@@ -60,7 +60,7 @@ class Log(models.Model):
     logDate = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"<{self.adminID}, {self.action}>"
+        return "<{}, {}>".format(self.adminID, self.action)
 
 
 class KeyWords(models.Model):
