@@ -5,21 +5,18 @@ from api_app.models import User, Persons, KeyWords, Pages, PersonsPageRank, Site
 data_users = [
     {
         'email': 'user1@mail.com',
-        'password': 'pbkdf2_sha256$36000$O1ml0WHmNSz0$vijdKCKfK8W4K1LcNxJbtPx+4CK6T2eYTBjWQz98tsU=',
-        'username': 'user1',
-        'is_staff': True
+        'password': 'userpassword',
+        'username': 'user1'
     },
     {
         'email': 'user2@mail.com',
-        'password': 'pbkdf2_sha256$36000$O1ml0WHmNSz0$vijdKCKfK8W4K1LcNxJbtPx+4CK6T2eYTBjWQz98tsU=',
-        'username': 'user2',
-        'is_staff': True
+        'password': 'userpassword',
+        'username': 'user2'
     },
     {
         'email': 'user3@mail.com',
-        'password': 'pbkdf2_sha256$36000$O1ml0WHmNSz0$vijdKCKfK8W4K1LcNxJbtPx+4CK6T2eYTBjWQz98tsU=',
-        'username': 'user3',
-        'is_staff': True
+        'password': 'userpassword',
+        'username': 'user3'
     },
 ]
 
@@ -115,7 +112,11 @@ class Command(BaseCommand):
 
         User.objects.all().delete()
         for user in data_users:
-            new_user = User(**user)
+            new_user = User.objects.create_user(
+	        username=user['username'],
+		email=user['email'],
+		password=user['password'],
+		)
             new_user.save()
 
         Persons.objects.all().delete()
