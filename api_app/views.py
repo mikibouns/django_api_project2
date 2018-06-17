@@ -41,10 +41,7 @@ from rest_framework.permissions import (
 
 from .permissions import IsOwnerOrReadOnly
 
-from rest_framework.pagination import (
-    LimitOffsetPagination,
-    PageNumberPagination
-)
+from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
 
 
 class UsersList(ListAPIView):
@@ -81,7 +78,7 @@ class PersonsList(ListAPIView):
     filter_backends = [SearchFilter, OrderingFilter] # для поика используесть конструкция:
     # http://127.0.0.1:8000/v1/persons/?search=Putin
     search_fields = ['name']# поля поиска
-    pagination_class = LimitOffsetPagination # ограничевает вывод результата на экран
+    pagination_class = PostPageNumberPagination # ограничевает вывод результата на экран
 
     def get_queryset(self, *args, **kwargs):
         '''для поика используесть конструкция: http://127.0.0.1:8000/v1/persons/?q=Putin'''
