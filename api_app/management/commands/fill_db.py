@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from api_app.models import User, Persons, KeyWords, Pages, PersonsPageRank, Sites, Log
 
-
 data_users = [
     {
         'email': 'user1@mail.com',
@@ -22,15 +21,16 @@ data_users = [
 
 data_persons = [
     {
-        'name': 'Putin',
+        'name': 'Путин',
         'addedBy': 'user1',
+
     },
     {
-        'name': 'Tramp',
+        'name': 'Трамп',
         'addedBy': 'user2',
     },
     {
-        'name': 'Obama',
+        'name': 'Ким Чен Ын',
         'addedBy': 'user2',
     },
 ]
@@ -70,37 +70,65 @@ data_pages = [
 
 data_keywords = [
     {
-        'name': 'igor',
-        'personID': 'Putin',
+        'name': 'Путина',
+        'personID': 'Путин',
     },
     {
-        'name': 'sasha',
-        'personID': 'Obama',
+        'name': 'Путиным',
+        'personID': 'Путин',
     },
     {
-        'name': 'vasia',
-        'personID': 'Tramp',
+        'name': 'Путину',
+        'personID': 'Путин',
+    },
+    {
+        'name': 'Путин',
+        'personID': 'Путин',
+    },
+    {
+        'name': 'Ким Чен Ыном',
+        'personID': 'Ким Чен Ын',
+    },
+    {
+        'name': 'Ким Чен Ыну',
+        'personID': 'Ким Чен Ын',
+    },
+    {
+        'name': 'Ким Чен Ын',
+        'personID': 'Ким Чен Ын',
+    },
+    {
+        'name': 'Трампом',
+        'personID': 'Трамп',
+    },
+    {
+        'name': 'Трампу',
+        'personID': 'Трамп',
+    },
+    {
+        'name': 'Трамп',
+        'personID': 'Трамп',
     },
 ]
 
 data_personspagerank = [
     {
-        'PersonID': 'Putin',
+        'PersonID': 'Путин',
         'PageID': 'https://motor.ru/',
         'Rank': '10',
     },
     {
-        'PersonID': 'Putin',
+        'PersonID': 'Путин',
         'PageID': 'https://lenta.ru/',
         'Rank': '3',
     },
     {
-        'PersonID': 'Putin',
+        'PersonID': 'Ким Чен Ын',
         'PageID': 'https://www.rambler.ru/',
         'Rank': '12',
     },
     {
-        'PersonID': 'Tramp',
+        'PersonID': 'Трамп',
         'PageID': 'https://motor.ru/',
         'Rank': '5',
     },
@@ -113,10 +141,10 @@ class Command(BaseCommand):
         User.objects.all().delete()
         for user in data_users:
             new_user = User.objects.create_user(
-	        username=user['username'],
-		email=user['email'],
-		password=user['password'],
-		)
+                username=user['username'],
+                email=user['email'],
+                password=user['password'],
+            )
             new_user.save()
 
         Persons.objects.all().delete()
@@ -124,7 +152,6 @@ class Command(BaseCommand):
             person['addedBy'] = User.objects.get(username=person['addedBy'])
             new_person = Persons(**person)
             new_person.save()
-
 
         Sites.objects.all().delete()
         for site in data_sites:
@@ -153,5 +180,3 @@ class Command(BaseCommand):
 
         super_user = User.objects.create_superuser('admin', 'admin@mail.com', 'm1k1b0uns')
         super_user.save()
-
-

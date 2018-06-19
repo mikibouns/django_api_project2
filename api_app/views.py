@@ -3,6 +3,7 @@ from rest_framework.filters import (
     SearchFilter,
     OrderingFilter,
 )
+
 from django.contrib.auth.models import User
 from api_app.models import (
     Sites,
@@ -16,6 +17,7 @@ from .serializers import (
     UsersListSerializer,
     UsersCreateUpdateSerializer,
     PersonsListSerializer,
+    PersonsDitailListSerializer,
     PersonsCreateUpdateSerializer,
     SitesListSerializer,
     SitesCreateUpdateSerializer,
@@ -41,7 +43,7 @@ from rest_framework.permissions import (
 
 from .permissions import IsOwnerOrReadOnly
 
-from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
+# from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
 
 
 class UsersList(ListAPIView):
@@ -73,12 +75,12 @@ class UsersDelete(DestroyAPIView):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class PersonsList(ListAPIView):
-    queryset = Persons.objects.all()
+    queryset = Persons.objects.all().order_by('name')
     serializer_class = PersonsListSerializer
     filter_backends = [SearchFilter, OrderingFilter] # для поика используесть конструкция:
     # http://127.0.0.1:8000/v1/persons/?search=Putin
-    search_fields = ['name']# поля поиска
-    pagination_class = PostPageNumberPagination # ограничевает вывод результата на экран
+    search_fields = ['name']# полt поиска
+    # pagination_class = PostPageNumberPagination # ограничевает вывод результата на экран
 
     def get_queryset(self, *args, **kwargs):
         '''для поика используесть конструкция: http://127.0.0.1:8000/v1/persons/?q=Putin'''
@@ -95,16 +97,18 @@ class PersonsList(ListAPIView):
 class PersonsCreate(CreateAPIView):
     queryset = Persons.objects.all()
     serializer_class = PersonsCreateUpdateSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'name'
 
     def perform_create(self, serializer):
         '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
         serializer.save(addedBy=self.request.user)
+        print(self.request.user)
 
 
 class PersonsDetail(RetrieveAPIView):
     queryset = Persons.objects.all()
-    serializer_class = PersonsListSerializer
+    serializer_class = PersonsDitailListSerializer
     lookup_field = 'name'
 
 
@@ -122,7 +126,11 @@ class PersonsUpdate(RetrieveUpdateAPIView):
 class PersonsDelete(DestroyAPIView):
     queryset = Persons.objects.all()
     serializer_class = PersonsListSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     lookup_field = 'name'
+
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -134,7 +142,7 @@ class SitesList(ListAPIView):
 class SitesCreate(CreateAPIView):
     queryset = Sites.objects.all()
     serializer_class = SitesCreateUpdateSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
@@ -159,3 +167,4 @@ class SitesUpdate(RetrieveUpdateAPIView):
 class SitesDelete(DestroyAPIView):
     queryset = Sites.objects.all()
     serializer_class = SitesListSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
