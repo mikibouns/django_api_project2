@@ -133,7 +133,7 @@ class PageRankDataListSerializer(ModelSerializer):
         fields = ['pageID', 'siteID', 'url', 'personID', 'rank']
 
     def get_pageID(self, obj):
-        data = PagesSerializer(obj.pages_children(), many=True).data
+        data = PagesGiveSerializer(obj.pages_children(), many=True).data
         if data:
             return data
         return None
@@ -158,10 +158,10 @@ class PageRankDataListSerializer(ModelSerializer):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-class PagesSerializer(ModelSerializer):
+class PagesGiveSerializer(ModelSerializer):
     class Meta:
         model = Pages
-        fields = ('id', 'siteID', 'URL', 'foundDateTime', 'lastScanDate')
+        fields = ('foundDateTime', 'lastScanDate')
 
 
 # ----------------------------------------------------------------------------------------------------------------------

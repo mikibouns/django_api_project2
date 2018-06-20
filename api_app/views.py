@@ -23,7 +23,6 @@ from .serializers import (
     PersonsPageRankGroupSerializer,
     PageRankDataListSerializer,
     LogSerializer,
-    PagesSerializer,
     KeyWordsSerializer)
 
 from rest_framework.generics import (
