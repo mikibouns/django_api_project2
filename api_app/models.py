@@ -24,6 +24,10 @@ class Persons(models.Model):
     def __str__(self):
         return self.name
 
+    def keywords_children(self):
+        '''метод для отображения содержимого поля ForeignKey'''
+        return KeyWords.objects.filter(personID=self)
+
 
 class Pages(models.Model):
     class Meta:
@@ -31,7 +35,7 @@ class Pages(models.Model):
 
     URL = models.CharField(max_length=150, unique=True)
     siteID = models.ForeignKey(Sites, on_delete=models.CASCADE)
-    foundDateTime = models.DateTimeField(null=True, blank=True)
+    foundDateTime = models.DateTimeField(auto_now_add=True)
     lastScanDate = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -42,12 +46,21 @@ class PersonsPageRank(models.Model):
     class Meta:
         db_table = 'personspagerank'
 
-    PersonID = models.ForeignKey(Persons, on_delete=models.CASCADE, primary_key=True)
-    PageID = models.ForeignKey(Pages, on_delete=models.CASCADE)
-    Rank = models.IntegerField(blank=True)
+    personID = models.ForeignKey(Persons, on_delete=models.CASCADE)
+    pageID = models.ForeignKey(Pages, on_delete=models.CASCADE)
+    rank = models.IntegerField(blank=True)
 
     def __str__(self):
-        return '<{}, {}>'.format(self.PersonID, self.PageID)
+        return '<{}, {}>'.format(self.personID, self.pageID)
+
+    def persons_children(self):
+        return Persons.objects.filter(id=self.personID.id)
+
+    def pages_children(self):
+        return Pages.objects.filter(id=self.id)
+
+    def sites_children(self):
+        return Sites.objects.filter(id=self.pageID.siteID.id)
 
 
 class Log(models.Model):
@@ -56,7 +69,7 @@ class Log(models.Model):
 
     adminID = models.ForeignKey(User, on_delete=models.CASCADE)
     action = models.CharField(max_length=150)
-    logDate = models.DateTimeField(auto_now=True)
+    logDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return "<{}, {}>".format(self.adminID, self.action)

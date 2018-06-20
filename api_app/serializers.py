@@ -23,6 +23,7 @@ class UsersCreateUpdateSerializer(ModelSerializer):
         model = User
         fields = ('username', 'email', 'password')
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 class SitesListSerializer(ModelSerializer):
@@ -35,6 +36,7 @@ class SitesCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = Sites
         fields = ('id', 'name', 'siteDescription')
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -51,20 +53,23 @@ class PersonsListSerializer(ModelSerializer):
 
 
 class PersonsDitailListSerializer(ModelSerializer):
-    addedBy = SerializerMethodField()
+    # addedBy = SerializerMethodField()
     keywords = SerializerMethodField()
     class Meta:
         model = Persons
-        fields = ('id', 'name', 'addedBy', 'keywords')
+        fields = ('id', 'name', 'keywords')
 
 
-    def get_addedBy(self, obj):
-        '''подменяет идентификатор значением поля username в связанном поле,
-        благодаря использованию SerializerMethodField'''
-        return str(obj.addedBy.username)
+    # def get_addedBy(self, obj):
+    #     '''подменяет идентификатор значением поля username в связанном поле,
+    #     благодаря использованию SerializerMethodField'''
+    #     return str(obj.addedBy.username)
 
     def get_keywords(self, obj):
-        return obj.name
+        data = KeyWordsSerializer(obj.keywords_children(), many=True).data
+        if data:
+            return data
+        return None
 
 
 class PersonsCreateUpdateSerializer(ModelSerializer):
@@ -72,13 +77,86 @@ class PersonsCreateUpdateSerializer(ModelSerializer):
         model = Persons
         fields = ('id', 'name')
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 
-class PersonsPageRankSerializer(ModelSerializer):
+class PersonsPageRankListSerializer(ModelSerializer):
+    site_id = SerializerMethodField()
     class Meta:
         model = PersonsPageRank
-        fields = ('id', 'PersonID', 'PageID', 'Rank')
+        fields = ('id', 'personID', 'pageID', 'rank', 'site_id')
 
+    def get_site_id(self, obj):
+        return str(obj.pageID.siteID.id)
+
+
+class PersonsPageRankGroupSerializer(ModelSerializer):
+    person_addby = SerializerMethodField()
+    person_name = SerializerMethodField()
+    person_rank = SerializerMethodField()
+    site_addby = SerializerMethodField()
+    site_id = SerializerMethodField()
+    site_name = SerializerMethodField()
+
+    class Meta:
+        model = PersonsPageRank
+        fields = ('person_addby', 'person_name', 'person_rank', 'site_addby', 'site_id', 'site_name')
+
+    def get_person_addby(self, obj):
+        return str(obj.personID.id)
+
+    def get_person_name(self, obj):
+        return str(obj.personID.name)
+
+    def get_person_rank(self, obj):
+        return str(obj.rank)
+
+    def get_site_addby(self, obj):
+        return str(obj.pageID.siteID.addedBy.username)
+
+    def get_site_id(self, obj):
+        return str(obj.pageID.siteID.id)
+
+    def get_site_name(self, obj):
+        return str(obj.pageID.siteID.name)
+
+
+class PageRankDataListSerializer(ModelSerializer):
+    pageID = SerializerMethodField()
+    siteID = SerializerMethodField()
+    url = SerializerMethodField()
+    personID = SerializerMethodField()
+    rank = SerializerMethodField()
+
+    class Meta:
+        model = Pages
+        fields = ['pageID', 'siteID', 'url', 'personID', 'rank']
+
+    def get_pageID(self, obj):
+        data = PagesSerializer(obj.pages_children(), many=True).data
+        if data:
+            return data
+        return None
+
+    def get_siteID(self, obj):
+        data = SitesListSerializer(obj.sites_children(), many=True).data
+        if data:
+            return data
+        return None
+
+    def get_url(self, obj):
+        return str(obj.pageID.URL)
+
+    def get_personID(self, obj):
+        data = PersonsListSerializer(obj.persons_children(), many=True).data
+        if data:
+            return data
+        return None
+
+    def get_rank(self, obj):
+        return str(obj.rank)
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 class PagesSerializer(ModelSerializer):
     class Meta:
@@ -86,11 +164,15 @@ class PagesSerializer(ModelSerializer):
         fields = ('id', 'siteID', 'URL', 'foundDateTime', 'lastScanDate')
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+
 class KeyWordsSerializer(ModelSerializer):
     class Meta:
         model = KeyWords
-        fields = ('id', 'personID', 'name')
+        fields = ('id', 'name')
 
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 class LogSerializer(ModelSerializer):
     class Meta:

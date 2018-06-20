@@ -9,16 +9,16 @@ urlpatterns = [
     url(r'^users/(?P<pk>\d+)/edit/$', views.UsersUpdate.as_view(), name='users_update'),
     url(r'^users/(?P<pk>\d+)/delete/$', views.UsersDelete.as_view(), name='users_delete'),
 
+    url(r'^persons/rank/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
+    url(r'^persons/rank/(?P<pk>\d+)/$', views.PersonsPageRankDetail.as_view(), name='ppr_detail'),
+    url(r'^persons/rank/date/$', views.PersonsPageRankDateList.as_view(), name='ppr_list_date'),
+    url(r'^persons/rank/(?P<pk>\d+)/date$', views.PersonsPageRankDateDetail.as_view(), name='ppr_detail_date'),
+
     url(r'^persons/$', views.PersonsList.as_view(), name='persons_list'),
     url(r'^persons/create/$', views.PersonsCreate.as_view(), name='persons_create'),
-    url(r'^persons/(?P<name>\w+)/$', views.PersonsDetail.as_view(), name='persons_detail'),
-    url(r'^persons/(?P<name>\w+)/edit/$', views.PersonsUpdate.as_view(), name='persons_update'),
-    url(r'^persons/(?P<name>\w+)/delete/$', views.PersonsDelete.as_view(), name='persons_delete'),
-
-    # url(r'^persons/rank/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
-    # url(r'^persons/rank/(?P<pk>\d+)/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
-    # url(r'^persons/rank/date/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
-    # url(r'^persons/rank/(?P<pk>\d+)/date/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
+    url(r'^persons/(?P<pk>\w+)/$', views.PersonsDetail.as_view(), name='persons_detail'),
+    url(r'^persons/(?P<pk>\w+)/edit/$', views.PersonsUpdate.as_view(), name='persons_update'),
+    url(r'^persons/(?P<pk>\w+)/delete/$', views.PersonsDelete.as_view(), name='persons_delete'),
 
     url(r'^sites/$', views.SitesList.as_view(), name='sites_list'),
     url(r'^sites/create/$', views.SitesCreate.as_view(), name='sites_create'),
