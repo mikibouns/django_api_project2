@@ -8,18 +8,13 @@ class PersonsFilter(filters.FilterSet):
         fields = ['id', 'name', 'addedBy']
 
 
-class GroupbyFilter(filters.FilterSet):
+class PersonsPageRankFilter(filters.FilterSet):
     siteID = filters.NumberFilter(name='pageID__siteID__id')
+    personID = filters.NumberFilter(name='personID__id')
+    pageID = filters.NumberFilter(name='pageID__id')
+    _from = filters.IsoDateTimeFilter(name='pageID__foundDateTime', lookup_expr='gte')
+    _till = filters.IsoDateTimeFilter(name='pageID__lastScanDate', lookup_expr='lte')
 
     class Meta:
         model = PersonsPageRank
-        fields = ['siteID', ]
-
-
-class DateTimeFilter(filters.FilterSet):
-    _from = filters.DateTimeFilter(name='foundDateTime')
-    _till = filters.DateTimeFilter(name='lastScanDate')
-
-    class Meta:
-        model = PersonsPageRank
-        fields = ['_from', '_till']
+        fields = ['siteID', 'personID', 'pageID', 'rank', '_from', '_till']

@@ -1,6 +1,8 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import PersonsFilter, GroupbyFilter
+from .filters import (
+    PersonsFilter,
+    PersonsPageRankFilter)
 
 from django.contrib.auth.models import User
 from api_app.models import (
@@ -183,44 +185,34 @@ class PersonsPageRankList(ListAPIView):
     queryset = PersonsPageRank.objects.all()
     serializer_class = PersonsPageRankListSerializer
     filter_backends = (DjangoFilterBackend,)
-    filter_class = GroupbyFilter
+    filter_class = PersonsPageRankFilter
 
     def get_queryset(self):
-        if self.request.GET.get('siteID'):
+        query = self.request.GET.get('groupby')
+        if query == 'siteID':
             self.serializer_class = PersonsPageRankGroupSerializer
         return self.queryset
 
 
-class PersonsPageRankDetail(GenericAPIView):
-    def get_object(self, *args, **kwargs):
-        # ppr_obj = PersonsPageRank.objects.filter(personID__pk=pk)
-        ppr_obj = PersonsPageRank.objects.filter(personID__pk=self.kwargs['pk'])
+class PersonsPageRankDetail(ListAPIView):
+    queryset = PersonsPageRank.objects.all()
+    serializer_class = PersonsPageRankListSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PersonsPageRankFilter
+
+    def get_object(self, pk):
+        ppr_obj = PersonsPageRank.objects.filter(personID__pk=pk)
         if ppr_obj:
             return ppr_obj
         else:
             raise Http404
 
-    def get(self, request, format=None, *args, **kwargs):
-        serializer = PersonsPageRankListSerializer(self.get_object(self.kwargs['pk']), many=True)
-        return Response(serializer.data)
-
-    # def get_queryset(self, *args, **kwargs):
-    #     if self.request.GET.get('siteID'):
-    #         self.queryset = self.get_object()
-    #         self.serializer_class = PersonsPageRankGroupSerializer
-    #     return self.queryset
-
-
-    # def get_queryset(self, *args, **kwargs):
-    #     '''для поика используесть конструкция: http://127.0.0.1:8000/v1/persons/?group=siteID'''
-    #     queryset_list = self.get_object(self.kwargs['pk'])
-    #     query = self.request.GET.get("siteID")
-    #     if query:
-    #         queryset_list = queryset_list.filter(
-    #             Q(pageID__siteID__id__icontains=query)
-    #         ).distinct()
-    #         self.serializer_class = PersonsPageRankGroupSerializer
-    #     return queryset_list
+    def get_queryset(self):
+        self.queryset = self.get_object(self.kwargs['pk'])
+        query = self.request.GET.get('groupby')
+        if query == 'siteID':
+            self.serializer_class = PersonsPageRankGroupSerializer
+        return self.queryset
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -228,7 +220,32 @@ class PersonsPageRankDetail(GenericAPIView):
 class PersonsPageRankDateList(ListAPIView):
     queryset = PersonsPageRank.objects.all()
     serializer_class = PageRankDataListSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PersonsPageRankFilter
+
+    def get_queryset(self):
+        query = self.request.GET.get('groupby')
+        if query == 'siteID':
+            self.serializer_class = PersonsPageRankGroupSerializer
+        return self.queryset
 
 
-class PersonsPageRankDateDetail(GenericAPIView):
-    pass
+class PersonsPageRankDateDetail(APIView):
+    queryset = PersonsPageRank.objects.all()
+    serializer_class = PageRankDataListSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PersonsPageRankFilter
+
+    # def get_object(self, pk):
+    #     ppr_obj = PersonsPageRank.objects.filter(personID__pk=pk)
+    #     if ppr_obj:
+    #         return ppr_obj
+    #     else:
+    #         raise Http404
+    #
+    # def get_queryset(self):
+    #     self.queryset = self.get_object(self.kwargs['pk'])
+    #     query = self.request.GET.get('groupby')
+    #     if query == 'siteID':
+    #         self.serializer_class = PersonsPageRankGroupSerializer
+    #     return self.queryset

@@ -4,18 +4,31 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 
 class UsersListSerializer(ModelSerializer):
-    login = SerializerMethodField() # сознаем новое поле с именем login
-    isadmin = SerializerMethodField() # сознаем новое поле с именем isadmin
+    user_login = SerializerMethodField() # сознаем новое поле с именем login
+    user_isadmin = SerializerMethodField() # сознаем новое поле с именем isadmin
+    user_addedby = SerializerMethodField()
+    user_email = SerializerMethodField()
+    user_id = SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('id', 'login', 'email', 'isadmin')
+        fields = ('user_id', 'user_login', 'user_email', 'user_isadmin', 'user_addedby')
 
-    def get_login(self, obj):
+    def get_user_login(self, obj):
         '''использует значение username для поля login используя SerializerMethodField'''
         return str(obj.username)
 
-    def get_isadmin(self, obj):
+    def get_user_isadmin(self, obj):
         return int(obj.is_superuser)
+
+    def get_user_email(self, obj):
+        return str(obj.email)
+
+    def get_user_id(self, obj):
+        return int(obj.id)
+
+    def get_user_addedby(self, obj):
+        return None
 
 
 class UsersCreateUpdateSerializer(ModelSerializer):
@@ -58,7 +71,6 @@ class PersonsDitailListSerializer(ModelSerializer):
     class Meta:
         model = Persons
         fields = ('id', 'name', 'keywords')
-
 
     # def get_addedBy(self, obj):
     #     '''подменяет идентификатор значением поля username в связанном поле,

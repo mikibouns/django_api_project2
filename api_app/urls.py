@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^persons/rank/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
     url(r'^persons/rank/(?P<pk>\d+)/$', views.PersonsPageRankDetail.as_view(), name='ppr_detail'),
     url(r'^persons/rank/date/$', views.PersonsPageRankDateList.as_view(), name='ppr_list_date'),
-    url(r'^persons/rank/(?P<pk>\d+)/date$', views.PersonsPageRankDateDetail.as_view(), name='ppr_detail_date'),
+    url(r'^persons/rank/(?P<pk>\d+)/date/$', views.PersonsPageRankDateDetail.as_view(), name='ppr_detail_date'),
 
     url(r'^persons/$', views.PersonsList.as_view(), name='persons_list'),
     url(r'^persons/create/$', views.PersonsCreate.as_view(), name='persons_create'),
