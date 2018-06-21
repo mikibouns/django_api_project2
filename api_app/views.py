@@ -230,22 +230,22 @@ class PersonsPageRankDateList(ListAPIView):
         return self.queryset
 
 
-class PersonsPageRankDateDetail(APIView):
+class PersonsPageRankDateDetail(ListAPIView):
     queryset = PersonsPageRank.objects.all()
     serializer_class = PageRankDataListSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = PersonsPageRankFilter
 
-    # def get_object(self, pk):
-    #     ppr_obj = PersonsPageRank.objects.filter(personID__pk=pk)
-    #     if ppr_obj:
-    #         return ppr_obj
-    #     else:
-    #         raise Http404
-    #
-    # def get_queryset(self):
-    #     self.queryset = self.get_object(self.kwargs['pk'])
-    #     query = self.request.GET.get('groupby')
-    #     if query == 'siteID':
-    #         self.serializer_class = PersonsPageRankGroupSerializer
-    #     return self.queryset
+    def get_object(self, pk):
+        ppr_obj = PersonsPageRank.objects.filter(personID__pk=pk)
+        if ppr_obj:
+            return ppr_obj
+        else:
+            raise Http404
+
+    def get_queryset(self):
+        self.queryset = self.get_object(self.kwargs['pk'])
+        query = self.request.GET.get('groupby')
+        if query == 'siteID':
+            self.serializer_class = PersonsPageRankGroupSerializer
+        return self.queryset
