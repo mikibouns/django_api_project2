@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import (
     PersonsFilter,
@@ -8,10 +7,7 @@ from django.contrib.auth.models import User
 from api_app.models import (
     Sites,
     Persons,
-    Log,
-    Pages,
-    PersonsPageRank,
-    KeyWords)
+    PersonsPageRank)
 
 from .serializers import (
     UsersListSerializer,
@@ -23,9 +19,7 @@ from .serializers import (
     SitesCreateUpdateSerializer,
     PersonsPageRankListSerializer,
     PersonsPageRankGroupSerializer,
-    PageRankDataListSerializer,
-    LogSerializer,
-    KeyWordsSerializer)
+    PageRankDataListSerializer)
 
 from rest_framework.generics import (
     ListAPIView,
@@ -33,8 +27,7 @@ from rest_framework.generics import (
     DestroyAPIView,
     UpdateAPIView,
     CreateAPIView,
-    RetrieveUpdateAPIView,
-    GenericAPIView)
+    RetrieveUpdateAPIView)
 
 from rest_framework.permissions import (
     AllowAny,
@@ -44,12 +37,8 @@ from rest_framework.permissions import (
 )
 
 from .permissions import IsOwnerOrReadOnly
-
-from rest_framework import viewsets
 from django.http import Http404
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import generics
 
 # from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
 
