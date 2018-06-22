@@ -179,5 +179,5 @@ class Command(BaseCommand):
             new_personspagerank = PersonsPageRank(**ppr)
             new_personspagerank.save()
 
-        super_user = User.objects.create_superuser('admin', 'admin@mail.com', 'm1k1b0uns')
+        super_user = User.objects.create_superuser('admin', 'admin@mail.com', 'admins_password')
         super_user.save()
