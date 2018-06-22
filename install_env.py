@@ -11,7 +11,7 @@ def check_python():
         return True
     return False
 
- 
+
 def main():
     if check_python():
         if platform.system() == 'Windows':
@@ -28,7 +28,7 @@ def main():
             print('For OS is non-installer, please install manually')
         print('created virtual environment and installed all packages')
     else:
-        print('!!!you have an old version of the python, you need version 3.4 and higher!!!')
+        print('!!!you have an old version of the python, you need version 3.4 or higher!!!')
 
 
 
