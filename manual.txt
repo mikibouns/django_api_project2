@@ -1,0 +1,44 @@
+1) установить python версией не ниже 3.4 ==> https://www.python.org/downloads/
+2) запустить файл установки виртуальной среды install_env.py, для этого необходимо
+   находиться в каталоге проекта (django_api_project2):
+   -- Windows
+	python install_env.py
+   -- Linux
+	python3 install_env.py
+	или
+	chmod +x install_env.py && ./install_env.py
+   -- MacOS
+	python3 install_env.py
+
+			==Активация виртуальной среды==
+1) активировать виртуальную можно следующим способом, для этого необходимо находиться
+   в каталоге проекта (django_api_project2):
+   -- Windows
+	venv\Scripts\activate.bat
+   -- Linux
+	. env/bin/activate
+	или
+	source env/bin/activate
+    -- MacOS
+	. env/bin/activate
+	или
+	source env/bin/activate
+
+	!!!Деактивируется виртуальная среда командой deactivate!!!
+
+			==Команды выполняемые в виртуальной среде==
+
+1) python manage.py runserver - запускает локальный веб-сервер,
+   который доступен по адресу 127.0.0.1:8000.
+   Если нужно указать другой порт или сделать
+   адрес доступным в локальной сети то выполняем следующую команду:
+   python manage.py runserver 0.0.0.0:8080 - где 8080 это номер порта
+
+2) python manage.py update_db - удаляет созданные миграции и БД, затем
+   создает заново
+
+3) python manage.py fill_db - очищает БД и заполняет ее снова тестовыми данными,
+   административная панель доступна по адресу (при условии что вы не меняли порт)
+   127.0.0.1:8000/admin
+   логин администратора: admin
+   пароль администратора: admins_password
