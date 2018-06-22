@@ -1,15 +1,34 @@
 import platform
 from subprocess import call
-import os
+import sys
+
+
+def check_python():
+    if float(sys.version[0:3]) >= 3.4:
+        return True
+    else:
+        print('!!!you have an old version of the python, you need version 3.4 and higher!!!')
+        return False
 
 
 def install_win_env():
     print('Windows')
-    print(os.system('python -V'))
+    if check_python():
+        try:
+            call(r'python -m venv env && . .\env\Scripts\activate.bat && pip install -r requirements.txt', shell=True)
+        except Exception as e:
+            print(e)
 
 
 def install_linux_env():
     print('Linux')
+    if check_python():
+        try:
+            call(r'python3 -m venv env && . env/bin/activate && pip install -r requirements.txt', shell=True)
+        except Exception as e:
+            print(e)
+
+
 
 
 def install_mac_env():
