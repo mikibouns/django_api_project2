@@ -18,7 +18,6 @@ def install_win_env():
     if check_python():
         call('python -m venv venv && {} && pip install -r requirements.txt'.format(path_activate_env), shell=True)
         print('created virtual environment and installed all packages')
-        os.ti
 
 
 def install_linux_env():
