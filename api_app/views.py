@@ -98,8 +98,8 @@ class UsersViewSet(viewsets.ViewSet):
     def create(self, request):
         serializer = UsersCreateUpdateSerializer(data=request.data)
         if serializer.is_valid():
-            print(serializer.validated_data['username'])
             user = User.objects.create_user(**serializer.validated_data)
+            user.is_staff = True
             user.save()
             return Response(
                 {'success': 1,
@@ -110,6 +110,7 @@ class UsersViewSet(viewsets.ViewSet):
                 'success': 0,
                 'message': 'Account could not be created with received data.'
         }, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class SitesViewSet(viewsets.ViewSet):
@@ -156,24 +157,24 @@ class PersonsPageRankViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class PersonsPageRankDateViewSet(viewsets.ModelViewSet):
-    queryset = PersonsPageRank.objects.all()
-    serializer_class = PageRankDataListSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = PersonsPageRankFilter
-
-    def groupby(self, queryset):
-        if self.request.GET.get('groupby') == 'siteID':
-            return PersonsPageRankGroupSerializer(queryset, many=True)
-        else:
-            return PageRankDataListSerializer(queryset, many=True)
-
-    def list(self, request):
-        queryset = PersonsPageRank.objects.all()
-        serializer = self.groupby(queryset)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = PersonsPageRank.objects.filter(personID__pk=pk)
-        serializer = self.groupby(queryset)
-        return Response(serializer.data)
+# class PersonsPageRankDateViewSet(viewsets.ModelViewSet):
+#     queryset = PersonsPageRank.objects.all()
+#     serializer_class = PageRankDataListSerializer
+#     filter_backends = (DjangoFilterBackend,)
+#     filter_class = PersonsPageRankFilter
+#
+#     def groupby(self, queryset):
+#         if self.request.GET.get('groupby') == 'siteID':
+#             return PersonsPageRankGroupSerializer(queryset, many=True)
+#         else:
+#             return PageRankDataListSerializer(queryset, many=True)
+#
+#     def list(self, request):
+#         queryset = PersonsPageRank.objects.all()
+#         serializer = self.groupby(queryset)
+#         return Response(serializer.data)
+#
+#     def retrieve(self, request, pk=None):
+#         queryset = PersonsPageRank.objects.filter(personID__pk=pk)
+#         serializer = self.groupby(queryset)
+#         return Response(serializer.data)
