@@ -3,6 +3,8 @@ from api_app.models import Sites, Log, Pages, Persons, PersonsPageRank, KeyWords
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 
+# Users ----------------------------------------------------------------------------------------------------------------
+
 class UsersListSerializer(ModelSerializer):
     user_login = SerializerMethodField() # сознаем новое поле с именем login
     user_isadmin = SerializerMethodField() # сознаем новое поле с именем isadmin
@@ -34,10 +36,10 @@ class UsersListSerializer(ModelSerializer):
 class UsersCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'password')
+        fields = ('username', 'email', 'password', 'is_superuser')
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# Sites ----------------------------------------------------------------------------------------------------------------
 
 class SitesListSerializer(ModelSerializer):
     class Meta:
@@ -51,7 +53,7 @@ class SitesCreateUpdateSerializer(ModelSerializer):
         fields = ('id', 'name', 'siteDescription')
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# Persons --------------------------------------------------------------------------------------------------------------
 
 class PersonsListSerializer(ModelSerializer):
     addedBy = SerializerMethodField()
@@ -90,7 +92,7 @@ class PersonsCreateUpdateSerializer(ModelSerializer):
         fields = ('id', 'name')
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# PersonsPageRank ------------------------------------------------------------------------------------------------------
 
 class PersonsPageRankListSerializer(ModelSerializer):
     site_id = SerializerMethodField()

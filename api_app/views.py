@@ -43,198 +43,137 @@ from rest_framework.response import Response
 # from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
 
 
-class UsersList(ListAPIView):
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UsersListSerializer
+# class UsersList(ListAPIView):
+#     queryset = User.objects.all().order_by('-date_joined')
+#     serializer_class = UsersListSerializer
+#
+#
+# class UsersCreate(CreateAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UsersCreateUpdateSerializer
+#     permission_classes = [IsAuthenticated, IsAdminUser]  # права доступа
+#
+#
+# class UsersDetail(RetrieveAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UsersListSerializer
+#
+#
+# class UsersUpdate(UpdateAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UsersCreateUpdateSerializer
+#     permission_classes = [IsAuthenticated, IsAdminUser]
+#
+#
+# class UsersDelete(DestroyAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UsersListSerializer
+
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import action
+
+from .permissions import IsOwnerOrReadOnly
+from django.http import Http404
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import detail_route, list_route, action
+from rest_framework import permissions, status, viewsets, views
+from rest_framework.parsers import JSONParser
 
 
-class UsersCreate(CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UsersCreateUpdateSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]  # права доступа
+class UsersViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        queryset = User.objects.all()
+        serializer = UsersListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = User.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = UsersListSerializer(user)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = UsersCreateUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            print(serializer.validated_data['username'])
+            user = User.objects.create_user(**serializer.validated_data)
+            user.save()
+            return Response(
+                {'success': 1,
+                'user_id': user.id}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+                'success': 0,
+                'message': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UsersDetail(RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UsersListSerializer
+class SitesViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        queryset = Sites.objects.all()
+        serializer = SitesListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = Sites.objects.all()
+        site = get_object_or_404(queryset, pk=pk)
+        serializer = SitesListSerializer(site)
+        return Response(serializer.data)
 
 
-class UsersUpdate(UpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UsersCreateUpdateSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+class PersonsViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        queryset = Persons.objects.all()
+        serializer = PersonsListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = Persons.objects.all()
+        person = get_object_or_404(queryset, pk=pk)
+        serializer = PersonsDitailListSerializer(person)
+        return Response(serializer.data)
 
 
-class UsersDelete(DestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UsersListSerializer
+class PersonsPageRankViewSet(viewsets.ViewSet):
 
+    def list(self, request):
+        queryset = PersonsPageRank.objects.all()
+        serializer = PersonsPageRankListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
-# ----------------------------------------------------------------------------------------------------------------------
-
-class PersonsList(ListAPIView):
-    queryset = Persons.objects.all().order_by('name')
-    serializer_class = PersonsListSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = PersonsFilter  # для поика используесть конструкция:
-    # http://127.0.0.1:8000/v1/persons/?search=Putin
-
-    # pagination_class = PostPageNumberPagination # ограничевает вывод результата на экран
-
-    # def get_queryset(self, *args, **kwargs):
-    #     '''для поика используесть конструкция: http://127.0.0.1:8000/v1/persons/?q=Putin'''
-    #     queryset_list = Persons.objects.all()
-    #     query = self.request.GET.get("q")
-    #     if query:
-    #         queryset_list = queryset_list.filter(
-    #             Q(name__icontains=query) |
-    #             Q(addedBy__username__icontains=query)
-    #         ).distinct()
-    #     return queryset_list
-
-
-class PersonsCreate(CreateAPIView):
-    queryset = Persons.objects.all()
-    serializer_class = PersonsCreateUpdateSerializer
-    permission_classes = [IsAuthenticated]
-    # lookup_field = 'name'
-
-    def perform_create(self, serializer):
-        '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
-        serializer.save(addedBy=self.request.user)
-        print(self.request.user)
-
-
-class PersonsDetail(RetrieveAPIView):
-    queryset = Persons.objects.all()
-    serializer_class = PersonsDitailListSerializer
-    # lookup_field = 'name'
-
-
-class PersonsUpdate(RetrieveUpdateAPIView):
-    queryset = Persons.objects.all()
-    serializer_class = PersonsCreateUpdateSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
-    # lookup_field = 'name'
-
-    def perform_update(self, serializer):
-        '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
-        serializer.save(addedBy=self.request.user)
-
-
-class PersonsDelete(DestroyAPIView):
-    queryset = Persons.objects.all()
-    serializer_class = PersonsListSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    # lookup_field = 'name'
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-class SitesList(ListAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesListSerializer
-
-
-class SitesCreate(CreateAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesCreateUpdateSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
-        serializer.save(addedBy=self.request.user)
-
-
-class SitesDetail(RetrieveAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesListSerializer
-
-
-class SitesUpdate(RetrieveUpdateAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesCreateUpdateSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
-    def perform_update(self, serializer):
-        '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
-        serializer.save(addedBy=self.request.user)
-
-
-class SitesDelete(DestroyAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesListSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-class PersonsPageRankList(ListAPIView):
-    queryset = PersonsPageRank.objects.all()
-    serializer_class = PersonsPageRankListSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = PersonsPageRankFilter
-
-    def get_queryset(self):
-        query = self.request.GET.get('groupby')
-        if query == 'siteID':
-            self.serializer_class = PersonsPageRankGroupSerializer
-        return self.queryset
-
-
-class PersonsPageRankDetail(ListAPIView):
-    queryset = PersonsPageRank.objects.all()
-    serializer_class = PersonsPageRankListSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = PersonsPageRankFilter
-
-    def get_object(self, pk):
-        ppr_obj = PersonsPageRank.objects.filter(personID__pk=pk)
-        if ppr_obj:
-            return ppr_obj
+    def retrieve(self, request, pk=None):
+        queryset = PersonsPageRank.objects.filter(personID__pk=pk)
+        if self.request.GET.get('groupby') == 'siteID':
+            serializer = PersonsPageRankGroupSerializer(queryset, many=True)
         else:
-            raise Http404
-
-    def get_queryset(self):
-        self.queryset = self.get_object(self.kwargs['pk'])
-        query = self.request.GET.get('groupby')
-        if query == 'siteID':
-            self.serializer_class = PersonsPageRankGroupSerializer
-        return self.queryset
+            serializer = PersonsPageRankListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-
-class PersonsPageRankDateList(ListAPIView):
+class PersonsPageRankDateViewSet(viewsets.ModelViewSet):
     queryset = PersonsPageRank.objects.all()
     serializer_class = PageRankDataListSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = PersonsPageRankFilter
 
-    def get_queryset(self):
-        query = self.request.GET.get('groupby')
-        if query == 'siteID':
-            self.serializer_class = PersonsPageRankGroupSerializer
-        return self.queryset
-
-
-class PersonsPageRankDateDetail(ListAPIView):
-    queryset = PersonsPageRank.objects.all()
-    serializer_class = PageRankDataListSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = PersonsPageRankFilter
-
-    def get_object(self, pk):
-        ppr_obj = PersonsPageRank.objects.filter(personID__pk=pk)
-        if ppr_obj:
-            return ppr_obj
+    def groupby(self, queryset):
+        if self.request.GET.get('groupby') == 'siteID':
+            return PersonsPageRankGroupSerializer(queryset, many=True)
         else:
-            raise Http404
+            return PageRankDataListSerializer(queryset, many=True)
 
-    def get_queryset(self):
-        self.queryset = self.get_object(self.kwargs['pk'])
-        query = self.request.GET.get('groupby')
-        if query == 'siteID':
-            self.serializer_class = PersonsPageRankGroupSerializer
-        return self.queryset
+    def list(self, request):
+        queryset = PersonsPageRank.objects.all()
+        serializer = self.groupby(queryset)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = PersonsPageRank.objects.filter(personID__pk=pk)
+        serializer = self.groupby(queryset)
+        return Response(serializer.data)

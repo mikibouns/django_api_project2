@@ -6,14 +6,8 @@ import sys
 import os
 
 
-def check_python():
-    if float(sys.version[0:3]) >= 3.4:
-        return True
-    return False
-
-
 def main():
-    if check_python():
+    if float(sys.version[0:3]) >= 3.4:
         if platform.system() == 'Windows':
             print('Windows')
             path_activate_env = os.path.join(os.getcwd(), r'venv\Scripts\activate.bat')
@@ -29,8 +23,6 @@ def main():
         print('created virtual environment and installed all packages')
     else:
         print('!!!you have an old version of the python, you need version 3.4 or higher!!!')
-
-
 
 
 if __name__ == '__main__':
