@@ -97,6 +97,8 @@ class KeyWords(models.Model):
 
     @classmethod
     def create(cls, request, words, person):
+        if isinstance(words, str):
+            words = words.replace(' ', '').split(',')
         words_id = []
         for word in words:
             new_word = cls(name=word, personID=person)

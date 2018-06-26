@@ -23,7 +23,8 @@ from .serializers import (
     PersonsPageRankListSerializer,
     PersonsPageRankGroupSerializer,
     PageRankDataListSerializer,
-    KeyWordsEditSerializer)
+    KeyWordsEditSerializer,
+    KeyWordsListSerializer)
 
 from .permissions import IsOwnerOrReadOnly
 
@@ -239,19 +240,21 @@ class PersonsPageRankViewSet(viewsets.GenericViewSet):
 class KeyWordsViewSet(viewsets.ModelViewSet):
     queryset = KeyWords.objects.all()
     serializer_class = KeyWordsEditSerializer
-    http_method_names = ['post', 'patch', 'delete', 'head']
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
-    # def modified_data(self, data):
-    #     mod_data = {
-    #     }
-    #     return mod_data
-    #
-    # def list(self, request, *args, **kwargs):
-    #     queryset = Persons.objects.all()
-    #     serializer = PersonsDitailListSerializer(queryset)
-    #     return Response(serializer.data)
+    def list(self, request):
+        queryset = Persons.objects.all()
+        serializer = PersonsDitailListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = KeyWords.objects.all()
+        keyword = get_object_or_404(queryset, pk=pk)
+        serializer = KeyWordsListSerializer(keyword)
+        return Response(serializer.data)
 
     def create(self, request):
+        print(request.data)
         try:
             person = Persons.objects.get(id=request.data['personID'])
             words_list = KeyWords.create(request,
@@ -259,7 +262,7 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
                                    person=person)
             return Response(
                 {'success': 1,
-                 'personID': person.name,
+                 'personID': person.id,
                  'added_keywords': words_list}
                 , status=status.HTTP_201_CREATED
             )
@@ -268,3 +271,17 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
                 'success': 0,
                 'exception': e
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.queryset.get(pk=kwargs.get('pk'))
+        serializer = KeyWordsListSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {'success': 1}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+            'success': 0,
+            'exception': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)

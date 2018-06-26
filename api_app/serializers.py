@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from api_app.models import Sites, Log, Pages, Persons, PersonsPageRank, KeyWords
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, CharField
 
 
 # Users ----------------------------------------------------------------------------------------------------------------
@@ -172,11 +172,11 @@ class PageRankDataListSerializer(ModelSerializer):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
+
 class PagesGiveSerializer(ModelSerializer):
     class Meta:
         model = Pages
         fields = ('foundDateTime', 'lastScanDate')
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -188,8 +188,8 @@ class KeyWordsListSerializer(ModelSerializer):
 
 
 class KeyWordsEditSerializer(ModelSerializer):
-    keywords = SerializerMethodField()
-
+    # keywords = SerializerMethodField()
+    keywords = CharField(required=False, allow_blank=True, max_length=100)
     class Meta:
         model = KeyWords
         fields = ('personID', 'keywords')
