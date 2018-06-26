@@ -99,7 +99,8 @@ class KeyWords(models.Model):
     def create(cls, request, words, person):
         words_id = []
         for word in words:
-            new_words = cls(name=word, personID=person)
-            words_id.append(new_words.id)
-            new_words.save()
+            new_word = cls(name=word, personID=person)
+            new_word.save()
+            words_id.append({"id": new_word.id,
+                             "name": new_word.name})
         return words_id

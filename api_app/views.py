@@ -239,27 +239,28 @@ class PersonsPageRankViewSet(viewsets.GenericViewSet):
 class KeyWordsViewSet(viewsets.ModelViewSet):
     queryset = KeyWords.objects.all()
     serializer_class = KeyWordsEditSerializer
-    http_method_names = ['get', 'post', 'patch', 'delete', 'head']
+    http_method_names = ['post', 'patch', 'delete', 'head']
 
-    def modified_data(self, data):
-        mod_data = {
-        }
-        return mod_data
-
-    def list(self, request, *args, **kwargs):
-        queryset = Persons.objects.all()
-        serializer = PersonsDitailListSerializer(queryset)
-        return Response(serializer.data)
+    # def modified_data(self, data):
+    #     mod_data = {
+    #     }
+    #     return mod_data
+    #
+    # def list(self, request, *args, **kwargs):
+    #     queryset = Persons.objects.all()
+    #     serializer = PersonsDitailListSerializer(queryset)
+    #     return Response(serializer.data)
 
     def create(self, request):
-        person = Persons.objects.get(id=request.data['personID'])
         try:
+            person = Persons.objects.get(id=request.data['personID'])
             words_list = KeyWords.create(request,
                                    words=request.data['keywords'],
                                    person=person)
             return Response(
                 {'success': 1,
-                'keywords_id': words_list}
+                 'personID': person.name,
+                 'added_keywords': words_list}
                 , status=status.HTTP_201_CREATED
             )
         except Exception as e:
