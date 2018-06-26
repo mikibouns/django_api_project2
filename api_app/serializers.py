@@ -50,7 +50,7 @@ class SitesListSerializer(ModelSerializer):
 class SitesCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = Sites
-        fields = ('id', 'name', 'siteDescription')
+        fields = ('name', 'siteDescription')
 
 
 # Persons --------------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ class PersonsDitailListSerializer(ModelSerializer):
 class PersonsCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = Persons
-        fields = ('id', 'name')
+        fields = ('name', )
 
 
 # PersonsPageRank ------------------------------------------------------------------------------------------------------

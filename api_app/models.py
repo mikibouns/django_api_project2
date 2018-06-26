@@ -13,6 +13,11 @@ class Sites(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def create(cls, request, name, siteDesc):
+        new_person = cls(name=name, siteDescription=siteDesc, addedBy=request.user)
+        return new_person
+
 
 class Persons(models.Model):
     class Meta:
@@ -28,6 +33,10 @@ class Persons(models.Model):
         '''метод для отображения содержимого поля ForeignKey'''
         return KeyWords.objects.filter(personID=self)
 
+    @classmethod
+    def create(cls, request, person):
+        new_person = cls(name=person, addedBy=request.user)
+        return new_person
 
 class Pages(models.Model):
     class Meta:
