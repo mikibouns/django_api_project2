@@ -38,6 +38,7 @@ class Persons(models.Model):
         new_person = cls(name=person, addedBy=request.user)
         return new_person
 
+
 class Pages(models.Model):
     class Meta:
         db_table = 'pages'
@@ -93,3 +94,12 @@ class KeyWords(models.Model):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def create(cls, request, words, person):
+        words_id = []
+        for word in words:
+            new_words = cls(name=word, personID=person)
+            words_id.append(new_words.id)
+            new_words.save()
+        return words_id

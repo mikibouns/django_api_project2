@@ -80,7 +80,7 @@ class PersonsDitailListSerializer(ModelSerializer):
     #     return str(obj.addedBy.username)
 
     def get_keywords(self, obj):
-        data = KeyWordsSerializer(obj.keywords_children(), many=True).data
+        data = KeyWordsListSerializer(obj.keywords_children(), many=True).data
         if data:
             return data
         return None
@@ -180,10 +180,26 @@ class PagesGiveSerializer(ModelSerializer):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-class KeyWordsSerializer(ModelSerializer):
+
+class KeyWordsListSerializer(ModelSerializer):
     class Meta:
         model = KeyWords
         fields = ('id', 'name')
+
+
+class KeyWordsEditSerializer(ModelSerializer):
+    keywords = SerializerMethodField()
+
+    class Meta:
+        model = KeyWords
+        fields = ('personID', 'keywords')
+
+
+    def get_keywords(self, obj):
+        data = KeyWordsListSerializer(obj.keywords_children(), many=True).data
+        if data:
+            return data
+        return None
 
 
 # ----------------------------------------------------------------------------------------------------------------------

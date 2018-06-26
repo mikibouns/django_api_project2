@@ -8,7 +8,7 @@ router.register(r'users', views.UsersViewSet, base_name='user')
 router.register(r'sites', views.SitesViewSet, base_name='site')
 router.register(r'persons', views.PersonsViewSet, base_name='person')
 router.register(r'rank', views.PersonsPageRankViewSet, base_name='ppr')
-
+router.register(r'keywords', views.KeyWordsViewSet, base_name='keywords')
 
 urlpatterns = [
     url(r'^', include(router.urls)),

@@ -9,7 +9,8 @@ from rest_framework import permissions, status, viewsets, mixins
 from api_app.models import (
     Sites,
     Persons,
-    PersonsPageRank)
+    PersonsPageRank,
+    KeyWords)
 
 from .serializers import (
     UsersListSerializer,
@@ -22,10 +23,9 @@ from .serializers import (
     PersonsPageRankListSerializer,
     PersonsPageRankGroupSerializer,
     PageRankDataListSerializer,
-    KeyWordsSerializer)
+    KeyWordsEditSerializer)
 
 from .permissions import IsOwnerOrReadOnly
-
 
 from .filters import (
     PersonsFilter,
@@ -35,6 +35,7 @@ from .filters import (
 class UsersViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UsersListSerializer
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def modified_data(self, data):
         mod_data = {}
@@ -99,9 +100,10 @@ class UsersViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-class SitesViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class SitesViewSet(viewsets.ModelViewSet):
     queryset = Sites.objects.all()
     serializer_class = SitesCreateUpdateSerializer
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def list(self, request):
         queryset = Sites.objects.all()
@@ -116,7 +118,6 @@ class SitesViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
 
     def create(self, request):
         serializer = SitesCreateUpdateSerializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
             site = Sites.create(request,
                                   name=serializer.validated_data['name'],
@@ -158,6 +159,7 @@ class SitesViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
 class PersonsViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     queryset = Persons.objects.all()
     serializer_class = PersonsCreateUpdateSerializer
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
     filter_backends = (DjangoFilterBackend,)
     filter_class = PersonsFilter
 
@@ -174,7 +176,6 @@ class PersonsViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
 
     def create(self, request):
         serializer = PersonsCreateUpdateSerializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
             person = Persons.create(request, person=serializer.validated_data['name'])
             person.save()
@@ -214,8 +215,9 @@ class PersonsViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
 class PersonsPageRankViewSet(viewsets.GenericViewSet):
     queryset = PersonsPageRank.objects.all()
     serializer_class = PersonsPageRankListSerializer
+    http_method_names = ['get', 'head']
     filter_backends = (DjangoFilterBackend,)
-    filter_class = PersonsPageRankFilter
+    filter_field = PersonsPageRankFilter
 
     def groupby(self, queryset):
         if self.request.GET.get('groupby') == 'siteID':
@@ -234,5 +236,34 @@ class PersonsPageRankViewSet(viewsets.GenericViewSet):
         return Response(serializer.data)
 
 
-class KeyWordsViewSet():
-    pass
+class KeyWordsViewSet(viewsets.ModelViewSet):
+    queryset = KeyWords.objects.all()
+    serializer_class = KeyWordsEditSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head']
+
+    def modified_data(self, data):
+        mod_data = {
+        }
+        return mod_data
+
+    def list(self, request, *args, **kwargs):
+        queryset = Persons.objects.all()
+        serializer = PersonsDitailListSerializer(queryset)
+        return Response(serializer.data)
+
+    def create(self, request):
+        person = Persons.objects.get(id=request.data['personID'])
+        try:
+            words_list = KeyWords.create(request,
+                                   words=request.data['keywords'],
+                                   person=person)
+            return Response(
+                {'success': 1,
+                'keywords_id': words_list}
+                , status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            return Response({
+                'success': 0,
+                'exception': e
+            }, status=status.HTTP_400_BAD_REQUEST)
