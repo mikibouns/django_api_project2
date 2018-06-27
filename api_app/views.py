@@ -1,10 +1,12 @@
 # from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from auth_app.models import User
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import detail_route, list_route, action
 from rest_framework import permissions, status, viewsets, mixins
+from rest_framework.authtoken.models import Token
 
 from api_app.models import (
     Sites,
@@ -22,11 +24,11 @@ from .serializers import (
     SitesCreateUpdateSerializer,
     PersonsPageRankListSerializer,
     PersonsPageRankGroupSerializer,
-    PageRankDataListSerializer,
+    PageRankDateListSerializer,
     KeyWordsEditSerializer,
     KeyWordsListSerializer)
 
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsOwnerOrReadOnlyKeyWords
 
 from .filters import (
     PersonsFilter,
@@ -34,16 +36,16 @@ from .filters import (
 
 
 class UsersViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsOwnerOrReadOnly]
     queryset = User.objects.all()
     serializer_class = UsersListSerializer
-    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def modified_data(self, data):
         mod_data = {}
         for key, value in {'username': 'user_login',
                            'email': 'user_email',
                            'password': 'user_password',
-                           'is_superuser': 'isAdmin'}.items():
+                           'is_staff': 'isAdmin'}.items():
             for j in data.keys():
                 if value == j:
                     mod_data[key] = data.get(j, None)
@@ -66,10 +68,12 @@ class UsersViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
         if serializer.is_valid():
             user = User.objects.create_user(**serializer.validated_data)
             user.is_staff = True
+            user.addedBy = request.user
             user.save()
             return Response(
                 {'success': 1,
-                'user_id': user.id}
+                 'user_id': user.id,
+                 'token_auth': Token.objects.get(user=user).key}
                 , status=status.HTTP_201_CREATED
             )
         return Response({
@@ -102,6 +106,7 @@ class UsersViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
 
 
 class SitesViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     queryset = Sites.objects.all()
     serializer_class = SitesCreateUpdateSerializer
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
@@ -158,11 +163,12 @@ class SitesViewSet(viewsets.ModelViewSet):
 
 
 class PersonsViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PersonsFilter
     queryset = Persons.objects.all()
     serializer_class = PersonsCreateUpdateSerializer
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = PersonsFilter
 
     def list(self, request):
         queryset = Persons.objects.all()
@@ -213,16 +219,17 @@ class PersonsViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-class PersonsPageRankViewSet(viewsets.GenericViewSet):
+class PersonsPageRankViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = PersonsPageRank.objects.all()
     serializer_class = PersonsPageRankListSerializer
-    http_method_names = ['get', 'head']
     filter_backends = (DjangoFilterBackend,)
     filter_field = PersonsPageRankFilter
 
     def groupby(self, queryset):
         if self.request.GET.get('groupby') == 'siteID':
             return PersonsPageRankGroupSerializer(queryset, many=True)
+        elif self.request.GET.get('groupby') == 'date':
+            return PageRankDateListSerializer(queryset, many=True)
         else:
             return PersonsPageRankListSerializer(queryset, many=True)
 
@@ -238,6 +245,7 @@ class PersonsPageRankViewSet(viewsets.GenericViewSet):
 
 
 class KeyWordsViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyKeyWords]
     queryset = KeyWords.objects.all()
     serializer_class = KeyWordsEditSerializer
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
@@ -257,15 +265,20 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
         print(request.data)
         try:
             person = Persons.objects.get(id=request.data['personID'])
-            words_list = KeyWords.create(request,
-                                   words=request.data['keywords'],
-                                   person=person)
-            return Response(
-                {'success': 1,
-                 'personID': person.id,
-                 'added_keywords': words_list}
-                , status=status.HTTP_201_CREATED
-            )
+            if person.addedBy == request.user or request.user.is_superuser:
+                words_list = KeyWords.create(request,
+                                       words=request.data['keywords'],
+                                       person=person)
+                return Response(
+                    {'success': 1,
+                     'personID': person.id,
+                     'added_keywords': words_list}
+                    , status=status.HTTP_201_CREATED
+                )
+            return Response({
+                'success': 0,
+                'exception': 'You do not have permission to perform this action.'
+            }, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             return Response({
                 'success': 0,

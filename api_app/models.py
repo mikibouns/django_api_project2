@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from auth_app.models import User
 
 
 class Sites(models.Model):

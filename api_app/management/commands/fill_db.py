@@ -144,7 +144,6 @@ class Command(BaseCommand):
                 username=user['username'],
                 email=user['email'],
                 password=user['password'],
-                is_staff=True,
             )
             new_user.save()
 

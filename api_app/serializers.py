@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from auth_app.models import User
 from api_app.models import Sites, Log, Pages, Persons, PersonsPageRank, KeyWords
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, CharField
 
@@ -21,7 +22,7 @@ class UsersListSerializer(ModelSerializer):
         return str(obj.username)
 
     def get_user_isadmin(self, obj):
-        return int(obj.is_superuser)
+        return int(obj.is_staff)
 
     def get_user_email(self, obj):
         return str(obj.email)
@@ -30,6 +31,8 @@ class UsersListSerializer(ModelSerializer):
         return int(obj.id)
 
     def get_user_addedby(self, obj):
+        if obj.addedBy:
+            return int(obj.addedBy.id)
         return None
 
 
@@ -135,7 +138,7 @@ class PersonsPageRankGroupSerializer(ModelSerializer):
         return str(obj.pageID.siteID.name)
 
 
-class PageRankDataListSerializer(ModelSerializer):
+class PageRankDateListSerializer(ModelSerializer):
     pageID = SerializerMethodField()
     siteID = SerializerMethodField()
     url = SerializerMethodField()
@@ -178,7 +181,7 @@ class PagesGiveSerializer(ModelSerializer):
         model = Pages
         fields = ('foundDateTime', 'lastScanDate')
 
-# ----------------------------------------------------------------------------------------------------------------------
+# KeyWords -------------------------------------------------------------------------------------------------------------
 
 
 class KeyWordsListSerializer(ModelSerializer):
@@ -202,7 +205,7 @@ class KeyWordsEditSerializer(ModelSerializer):
         return None
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# Log ------------------------------------------------------------------------------------------------------------------
 
 class LogSerializer(ModelSerializer):
     class Meta:
