@@ -51,18 +51,18 @@ class UsersViewSet(viewsets.ModelViewSet):
                     mod_data[key] = data.get(j, None)
         return mod_data
 
-    def list(self, request):
-        queryset = User.objects.all()
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
         serializer = UsersListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        queryset = User.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
         user = get_object_or_404(queryset, pk=kwargs['pk'])
         serializer = UsersListSerializer(user)
         return Response(serializer.data)
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         mod_data = self.modified_data(request.data)
         serializer = UsersCreateUpdateSerializer(data=mod_data)
         if serializer.is_valid():
@@ -83,7 +83,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         mod_data = self.modified_data(request.data)
-        instance = self.queryset.get(pk=kwargs.get('pk'))
+        instance = self.queryset.get(pk=kwargs['pk'])
         serializer = UsersCreateUpdateSerializer(instance, data=mod_data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -97,7 +97,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs.get('pk'))
+        instance = self.queryset.get(pk=kwargs['pk'])
         try:
             self.perform_destroy(instance)
         except Exception as e:
@@ -112,12 +112,12 @@ class SitesViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def list(self, request, *args, **kwargs):
-        queryset = Sites.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
         serializer = SitesListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        queryset = Sites.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
         site = get_object_or_404(queryset, pk=kwargs['pk'])
         serializer = SitesListSerializer(site)
         return Response(serializer.data)
@@ -140,7 +140,7 @@ class SitesViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs.get('pk'))
+        instance = self.queryset.get(pk=kwargs['pk'])
         serializer = SitesCreateUpdateSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -154,7 +154,7 @@ class SitesViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs.get('pk'))
+        instance = self.queryset.get(pk=kwargs['pk'])
         try:
             self.perform_destroy(instance)
         except Exception as e:
@@ -228,6 +228,8 @@ class PersonsPageRankViewSet(viewsets.ReadOnlyModelViewSet):
     def groupby(self, queryset):
         if self.request.GET.get('groupby') == 'siteID':
             return PersonsPageRankGroupSerializer(queryset, many=True)
+        elif self.request.GET.get('groupby') == 'date':
+            return PageRankDateListSerializer(queryset, many=True)
         else:
             return PersonsPageRankListSerializer(queryset, many=True)
 
@@ -250,12 +252,12 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
     def list(self, request, *args, **kwargs):
-        queryset = Persons.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
         serializer = PersonsDitailListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        queryset = KeyWords.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
         keyword = get_object_or_404(queryset, pk=kwargs['pk'])
         serializer = KeyWordsListSerializer(keyword)
         return Response(serializer.data)
@@ -285,7 +287,7 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs.get('pk'))
+        instance = self.queryset.get(pk=kwargs['pk'])
         serializer = KeyWordsListSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
