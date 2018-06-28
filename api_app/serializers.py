@@ -104,7 +104,7 @@ class PersonsPageRankListSerializer(ModelSerializer):
         fields = ('id', 'personID', 'pageID', 'rank', 'site_id')
 
     def get_site_id(self, obj):
-        return str(obj.pageID.siteID.id)
+        return int(obj.pageID.siteID.id)
 
 
 class PersonsPageRankGroupSerializer(ModelSerializer):
@@ -120,19 +120,19 @@ class PersonsPageRankGroupSerializer(ModelSerializer):
         fields = ('person_addby', 'person_name', 'person_rank', 'site_addby', 'site_id', 'site_name')
 
     def get_person_addby(self, obj):
-        return str(obj.personID.id)
+        return int(obj.personID.id)
 
     def get_person_name(self, obj):
         return str(obj.personID.name)
 
     def get_person_rank(self, obj):
-        return str(obj.rank)
+        return int(obj.rank)
 
     def get_site_addby(self, obj):
         return str(obj.pageID.siteID.addedBy.username)
 
     def get_site_id(self, obj):
-        return str(obj.pageID.siteID.id)
+        return int(obj.pageID.siteID.id)
 
     def get_site_name(self, obj):
         return str(obj.pageID.siteID.name)
