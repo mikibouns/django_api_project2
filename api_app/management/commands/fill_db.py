@@ -113,24 +113,24 @@ data_keywords = [
 
 data_personspagerank = [
     {
-        'PersonID': 'Путин',
-        'PageID': 'https://motor.ru/',
-        'Rank': '10',
+        'personID': 'Путин',
+        'pageID': 'https://motor.ru/',
+        'rank': '10',
     },
     {
-        'PersonID': 'Путин',
-        'PageID': 'https://lenta.ru/',
-        'Rank': '3',
+        'personID': 'Путин',
+        'pageID': 'https://lenta.ru/',
+        'rank': '3',
     },
     {
-        'PersonID': 'Ким Чен Ын',
-        'PageID': 'https://www.rambler.ru/',
-        'Rank': '12',
+        'personID': 'Ким Чен Ын',
+        'pageID': 'https://www.rambler.ru/',
+        'rank': '12',
     },
     {
-        'PersonID': 'Трамп',
-        'PageID': 'https://motor.ru/',
-        'Rank': '5',
+        'personID': 'Трамп',
+        'pageID': 'https://motor.ru/',
+        'rank': '5',
     },
 ]
 
@@ -173,10 +173,10 @@ class Command(BaseCommand):
 
         PersonsPageRank.objects.all().delete()
         for ppr in data_personspagerank:
-            ppr['PersonID'] = Persons.objects.get(name=ppr['PersonID'])
-            ppr['PageID'] = Pages.objects.get(URL=ppr['PageID'])
+            ppr['personID'] = Persons.objects.get(name=ppr['personID'])
+            ppr['pageID'] = Pages.objects.get(URL=ppr['pageID'])
             new_personspagerank = PersonsPageRank(**ppr)
             new_personspagerank.save()
 
-        super_user = User.objects.create_superuser('admin', 'admin@mail.com', 'm1k1b0uns')
+        super_user = User.objects.create_superuser('admin', 'admin@mail.com', 'admins_password')
         super_user.save()

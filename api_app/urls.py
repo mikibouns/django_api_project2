@@ -1,28 +1,16 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from . import views
+from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken import views as auth_views
 
+router = DefaultRouter()
+router.register(r'users', views.UsersViewSet, base_name='user')
+router.register(r'sites', views.SitesViewSet, base_name='site')
+router.register(r'persons', views.PersonsViewSet, base_name='person')
+router.register(r'rank', views.PersonsPageRankViewSet, base_name='ppr')
+router.register(r'keywords', views.KeyWordsViewSet, base_name='keywords')
 
 urlpatterns = [
-    url(r'^users/$', views.UsersList.as_view(), name='users_list'),
-    url(r'^users/create/$', views.UsersCreate.as_view(), name='users_create'),
-    url(r'^users/(?P<pk>\d+)/$', views.UsersDetail.as_view(), name='users_detail'),
-    url(r'^users/(?P<pk>\d+)/edit/$', views.UsersUpdate.as_view(), name='users_update'),
-    url(r'^users/(?P<pk>\d+)/delete/$', views.UsersDelete.as_view(), name='users_delete'),
-
-    url(r'^persons/$', views.PersonsList.as_view(), name='persons_list'),
-    url(r'^persons/create/$', views.PersonsCreate.as_view(), name='persons_create'),
-    url(r'^persons/(?P<name>\w+)/$', views.PersonsDetail.as_view(), name='persons_detail'),
-    url(r'^persons/(?P<name>\w+)/edit/$', views.PersonsUpdate.as_view(), name='persons_update'),
-    url(r'^persons/(?P<name>\w+)/delete/$', views.PersonsDelete.as_view(), name='persons_delete'),
-
-    # url(r'^persons/rank/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
-    # url(r'^persons/rank/(?P<pk>\d+)/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
-    # url(r'^persons/rank/date/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
-    # url(r'^persons/rank/(?P<pk>\d+)/date/$', views.PersonsPageRankList.as_view(), name='ppr_list'),
-
-    url(r'^sites/$', views.SitesList.as_view(), name='sites_list'),
-    url(r'^sites/create/$', views.SitesCreate.as_view(), name='sites_create'),
-    url(r'^sites/(?P<pk>\d+)/$', views.SitesDetail.as_view(), name='sites_detail'),
-    url(r'^sites/(?P<pk>\d+)/edit/$', views.SitesUpdate.as_view(), name='sites_update'),
-    url(r'^sites/(?P<pk>\d+)/delete/$', views.SitesDelete.as_view(), name='sites_delete'),
+    url(r'^', include(router.urls)),
+    url(r'^api-token-auth/', auth_views.obtain_auth_token),
 ]

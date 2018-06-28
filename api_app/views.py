@@ -1,15 +1,16 @@
-from django.db.models import Q
-from rest_framework.filters import (
-    SearchFilter,
-    OrderingFilter,
-)
+# from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+# from django.contrib.auth.models import User
+from auth_app.models import User
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import detail_route, list_route, action
+from rest_framework import permissions, status, viewsets, mixins
+from rest_framework.authtoken.models import Token
 
-from django.contrib.auth.models import User
 from api_app.models import (
     Sites,
     Persons,
-    Log,
-    Pages,
     PersonsPageRank,
     KeyWords)
 
@@ -21,150 +22,279 @@ from .serializers import (
     PersonsCreateUpdateSerializer,
     SitesListSerializer,
     SitesCreateUpdateSerializer,
-    LogSerializer,
-    PersonsPageRankSerializer,
-    PagesSerializer,
-    KeyWordsSerializer)
+    PersonsPageRankListSerializer,
+    PersonsPageRankGroupSerializer,
+    PageRankDateListSerializer,
+    KeyWordsEditSerializer,
+    KeyWordsListSerializer)
 
-from rest_framework.generics import (
-    ListAPIView,
-    RetrieveAPIView,
-    DestroyAPIView,
-    UpdateAPIView,
-    CreateAPIView,
-    RetrieveUpdateAPIView)
+from .permissions import IsOwnerOrReadOnly, IsOwnerOrReadOnlyKeyWords
 
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAdminUser,
-    IsAuthenticatedOrReadOnly,
-)
-
-from .permissions import IsOwnerOrReadOnly
-
-# from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
+from .filters import (
+    PersonsFilter,
+    PersonsPageRankFilter)
 
 
-class UsersList(ListAPIView):
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UsersListSerializer
-
-
-class UsersCreate(CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UsersCreateUpdateSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]# права доступа
-
-
-class UsersDetail(RetrieveAPIView):
+class UsersViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsOwnerOrReadOnly]
     queryset = User.objects.all()
     serializer_class = UsersListSerializer
 
+    def modified_data(self, data):
+        mod_data = {}
+        for key, value in {'username': 'user_login',
+                           'email': 'user_email',
+                           'password': 'user_password',
+                           'is_staff': 'isAdmin'}.items():
+            for j in data.keys():
+                if value == j:
+                    mod_data[key] = data.get(j, None)
+        return mod_data
 
-class UsersUpdate(UpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UsersCreateUpdateSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    def list(self, request):
+        queryset = User.objects.all()
+        serializer = UsersListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
+    def retrieve(self, request, pk=None):
+        queryset = User.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = UsersListSerializer(user)
+        return Response(serializer.data)
 
-class UsersDelete(DestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UsersListSerializer
+    def create(self, request):
+        mod_data = self.modified_data(request.data)
+        serializer = UsersCreateUpdateSerializer(data=mod_data)
+        if serializer.is_valid():
+            user = User.objects.create_user(**serializer.validated_data)
+            user.is_staff = True
+            user.addedBy = request.user
+            user.save()
+            return Response(
+                {'success': 1,
+                 'user_id': user.id,
+                 'token_auth': Token.objects.get(user=user).key}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+                'success': 0,
+                'exception': ''
+        }, status=status.HTTP_400_BAD_REQUEST)
 
-# ----------------------------------------------------------------------------------------------------------------------
+    def update(self, request, *args, **kwargs):
+        mod_data = self.modified_data(request.data)
+        instance = self.queryset.get(pk=kwargs.get('pk'))
+        serializer = UsersCreateUpdateSerializer(instance, data=mod_data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {'success': 1}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+            'success': 0,
+            'exception': serializer.ValidationError
+        }, status=status.HTTP_400_BAD_REQUEST)
 
-class PersonsList(ListAPIView):
-    queryset = Persons.objects.all().order_by('name')
-    serializer_class = PersonsListSerializer
-    filter_backends = [SearchFilter, OrderingFilter] # для поика используесть конструкция:
-    # http://127.0.0.1:8000/v1/persons/?search=Putin
-    search_fields = ['name']# полt поиска
-    # pagination_class = PostPageNumberPagination # ограничевает вывод результата на экран
-
-    def get_queryset(self, *args, **kwargs):
-        '''для поика используесть конструкция: http://127.0.0.1:8000/v1/persons/?q=Putin'''
-        queryset_list = Persons.objects.all()
-        query = self.request.GET.get("q")
-        if query:
-            queryset_list = queryset_list.filter(
-                Q(name__icontains=query) |
-                Q(addedBy__username__icontains=query)
-            ).distinct()
-        return queryset_list
-
-
-class PersonsCreate(CreateAPIView):
-    queryset = Persons.objects.all()
-    serializer_class = PersonsCreateUpdateSerializer
-    permission_classes = [IsAuthenticated]
-    lookup_field = 'name'
-
-    def perform_create(self, serializer):
-        '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
-        serializer.save(addedBy=self.request.user)
-        print(self.request.user)
-
-
-class PersonsDetail(RetrieveAPIView):
-    queryset = Persons.objects.all()
-    serializer_class = PersonsDitailListSerializer
-    lookup_field = 'name'
-
-
-class PersonsUpdate(RetrieveUpdateAPIView):
-    queryset = Persons.objects.all()
-    serializer_class = PersonsCreateUpdateSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    lookup_field = 'name'
-
-    def perform_update(self, serializer):
-        '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
-        serializer.save(addedBy=self.request.user)
-
-
-class PersonsDelete(DestroyAPIView):
-    queryset = Persons.objects.all()
-    serializer_class = PersonsListSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    lookup_field = 'name'
-
-# ----------------------------------------------------------------------------------------------------------------------
+    def destroy(self, request, *args, **kwargs):
+        instance = self.queryset.get(pk=kwargs.get('pk'))
+        try:
+            self.perform_destroy(instance)
+        except Exception as e:
+            return Response({'success': 0, 'exception': e}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-
-class SitesList(ListAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesListSerializer
-
-
-class SitesCreate(CreateAPIView):
+class SitesViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     queryset = Sites.objects.all()
     serializer_class = SitesCreateUpdateSerializer
-    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
-    def perform_create(self, serializer):
-        '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
-        serializer.save(addedBy=self.request.user)
+    def list(self, request):
+        queryset = Sites.objects.all()
+        serializer = SitesListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = Sites.objects.all()
+        site = get_object_or_404(queryset, pk=pk)
+        serializer = SitesListSerializer(site)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = SitesCreateUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            site = Sites.create(request,
+                                  name=serializer.validated_data['name'],
+                                  siteDesc=serializer.validated_data['siteDescription'])
+            site.save()
+            return Response(
+                {'success': 1,
+                'persons_id': site.id}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+            'success': 0,
+            'exception': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.queryset.get(pk=kwargs.get('pk'))
+        serializer = SitesCreateUpdateSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {'success': 1}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+            'success': 0,
+            'exception': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.queryset.get(pk=kwargs.get('pk'))
+        try:
+            self.perform_destroy(instance)
+        except Exception as e:
+            return Response({'success': 0, 'exception': e}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-class SitesDetail(RetrieveAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesListSerializer
+class PersonsViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PersonsFilter
+    queryset = Persons.objects.all()
+    serializer_class = PersonsCreateUpdateSerializer
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+
+    def list(self, request):
+        queryset = Persons.objects.all()
+        serializer = PersonsListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = Persons.objects.all()
+        person = get_object_or_404(queryset, pk=pk)
+        serializer = PersonsDitailListSerializer(person)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = PersonsCreateUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            person = Persons.create(request, person=serializer.validated_data['name'])
+            person.save()
+            return Response(
+                {'success': 1,
+                'persons_id': person.id}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+            'success': 0,
+            'exception': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.queryset.get(pk=kwargs.get('pk'))
+        serializer = PersonsCreateUpdateSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {'success': 1}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+            'success': 0,
+            'exception': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.queryset.get(pk=kwargs.get('pk'))
+        try:
+            self.perform_destroy(instance)
+        except Exception as e:
+            return Response({'success': 0, 'exception': e}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-class SitesUpdate(RetrieveUpdateAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesCreateUpdateSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+class PersonsPageRankViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PersonsPageRank.objects.all()
+    serializer_class = PersonsPageRankListSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_field = PersonsPageRankFilter
 
-    def perform_update(self, serializer):
-        '''использует идентификатор текущего пользователя для поля один ко многим, автоподстановка'''
-        serializer.save(addedBy=self.request.user)
+    def groupby(self, queryset):
+        if self.request.GET.get('groupby') == 'siteID':
+            return PersonsPageRankGroupSerializer(queryset, many=True)
+        elif self.request.GET.get('groupby') == 'date':
+            return PageRankDateListSerializer(queryset, many=True)
+        else:
+            return PersonsPageRankListSerializer(queryset, many=True)
+
+    def list(self, request):
+        queryset = PersonsPageRank.objects.all()
+        serializer = self.groupby(queryset)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = PersonsPageRank.objects.filter(personID__pk=pk)
+        serializer = self.groupby(queryset)
+        return Response(serializer.data)
 
 
-class SitesDelete(DestroyAPIView):
-    queryset = Sites.objects.all()
-    serializer_class = SitesListSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+class KeyWordsViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyKeyWords]
+    queryset = KeyWords.objects.all()
+    serializer_class = KeyWordsEditSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head']
+
+    def list(self, request):
+        queryset = Persons.objects.all()
+        serializer = PersonsDitailListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = KeyWords.objects.all()
+        keyword = get_object_or_404(queryset, pk=pk)
+        serializer = KeyWordsListSerializer(keyword)
+        return Response(serializer.data)
+
+    def create(self, request):
+        print(request.data)
+        try:
+            person = Persons.objects.get(id=request.data['personID'])
+            if person.addedBy == request.user or request.user.is_superuser:
+                words_list = KeyWords.create(request,
+                                       words=request.data['keywords'],
+                                       person=person)
+                return Response(
+                    {'success': 1,
+                     'personID': person.id,
+                     'added_keywords': words_list}
+                    , status=status.HTTP_201_CREATED
+                )
+            return Response({
+                'success': 0,
+                'exception': 'You do not have permission to perform this action.'
+            }, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({
+                'success': 0,
+                'exception': e
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.queryset.get(pk=kwargs.get('pk'))
+        serializer = KeyWordsListSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {'success': 1}
+                , status=status.HTTP_201_CREATED
+            )
+        return Response({
+            'success': 0,
+            'exception': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)
