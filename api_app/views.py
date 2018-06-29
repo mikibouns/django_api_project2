@@ -41,7 +41,7 @@ class APIRootView(APIView):
     def get(self, request):
         data = [
             {
-                'api_url': '{}/v1/'.format(request.get_full_path()),
+                'api_url': request.build_absolute_uri(),
                 'method': 'get',
                 'comments': 'Описание доступных методов (этот документ)'
             },
