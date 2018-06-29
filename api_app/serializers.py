@@ -1,7 +1,11 @@
 # from django.contrib.auth.models import User
 from auth_app.models import User
 from api_app.models import Sites, Log, Pages, Persons, PersonsPageRank, KeyWords
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, CharField
+from rest_framework.serializers import (
+    ModelSerializer,
+    SerializerMethodField,
+    CharField
+)
 
 
 # Users ----------------------------------------------------------------------------------------------------------------

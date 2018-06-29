@@ -4,9 +4,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from auth_app.models import User
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import detail_route, list_route, action
-from rest_framework import permissions, status, viewsets, mixins
+from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
+from rest_framework.reverse import reverse
+from rest_framework.views import APIView
+from rest_framework.decorators import action, list_route, detail_route
 
 from api_app.models import (
     Sites,
@@ -35,6 +37,68 @@ from .filters import (
     PersonsPageRankFilter)
 
 
+class APIRootView(APIView):
+    def get(self, request):
+        data = [
+            {
+                'api_url': request.build_absolute_uri(),
+                'method': 'get',
+                'comments': 'Описание доступных методов (этот документ)'
+            },
+            {
+                'api_url': reverse('v1:users_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список пользователей'
+            },
+            {
+                'api_url': reverse('v1:users_rud', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить пользователя c id = 1'
+            },
+            {
+                'api_url': reverse('v1:persons_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список персон'
+            },
+            {
+                'api_url': reverse('v1:persons_rud', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить ключевые слова для person_id = 1'
+            },
+            {
+                'api_url': reverse('v1:ppr_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список персон с их рангами по всем сайтам'
+            },
+            {
+                'api_url': reverse('v1:ppr_rud', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить список рангов по всем сайтам для person_id = 1'
+            },
+            {
+                'api_url': reverse('v1:sites_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список сайтов'
+            },
+            {
+                'api_url': reverse('v1:sites_rud', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить сайт по site_id = 1'
+            },
+            {
+                'api_url': reverse('v1:ppr_date_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список персон с их рангами по всем сайтам c информацией о периоде времени'
+            },
+            {
+                'api_url': reverse('v1:ppr_date_r', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить ранг person_id=1 по всем сайтам c информацией о периоде времени'
+            },
+        ]
+        return Response(data)
+
+
 class UsersViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsOwnerOrReadOnly]
     queryset = User.objects.all()
@@ -58,7 +122,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        user = get_object_or_404(queryset, pk=kwargs['pk'])
+        user = get_object_or_404(queryset, pk=kwargs.get('pk'))
         serializer = UsersListSerializer(user)
         return Response(serializer.data)
 
@@ -83,7 +147,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         mod_data = self.modified_data(request.data)
-        instance = self.queryset.get(pk=kwargs['pk'])
+        instance = self.queryset.get(pk=kwargs.get('pk'))
         serializer = UsersCreateUpdateSerializer(instance, data=mod_data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -97,7 +161,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs['pk'])
+        instance = self.queryset.get(pk=kwargs.get('pk'))
         try:
             self.perform_destroy(instance)
         except Exception as e:
@@ -118,7 +182,7 @@ class SitesViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        site = get_object_or_404(queryset, pk=kwargs['pk'])
+        site = get_object_or_404(queryset, pk=kwargs.get('pk'))
         serializer = SitesListSerializer(site)
         return Response(serializer.data)
 
@@ -140,7 +204,7 @@ class SitesViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs['pk'])
+        instance = self.queryset.get(pk=kwargs.get('pk'))
         serializer = SitesCreateUpdateSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -154,7 +218,7 @@ class SitesViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs['pk'])
+        instance = self.queryset.get(pk=kwargs.get('pk'))
         try:
             self.perform_destroy(instance)
         except Exception as e:
@@ -163,12 +227,12 @@ class SitesViewSet(viewsets.ModelViewSet):
 
 
 class PersonsViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = PersonsFilter
     queryset = Persons.objects.all()
     serializer_class = PersonsCreateUpdateSerializer
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PersonsFilter
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -177,7 +241,7 @@ class PersonsViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        person = get_object_or_404(queryset, pk=kwargs['pk'])
+        person = get_object_or_404(queryset, pk=kwargs.get('pk'))
         serializer = PersonsDitailListSerializer(person)
         return Response(serializer.data)
 
@@ -228,8 +292,6 @@ class PersonsPageRankViewSet(viewsets.ReadOnlyModelViewSet):
     def groupby(self, queryset):
         if self.request.GET.get('groupby') == 'siteID':
             return PersonsPageRankGroupSerializer(queryset, many=True)
-        elif self.request.GET.get('groupby') == 'date':
-            return PageRankDateListSerializer(queryset, many=True)
         else:
             return PersonsPageRankListSerializer(queryset, many=True)
 
@@ -239,8 +301,30 @@ class PersonsPageRankViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(PersonsPageRank.objects.filter(personID__pk=kwargs['pk']))
-        # queryset = PersonsPageRank.objects.filter(personID__pk=kwargs['pk'])
+        queryset = self.filter_queryset(self.get_queryset().filter(personID__pk=kwargs.get('pk')))
+        serializer = self.groupby(queryset)
+        return Response(serializer.data)
+
+
+class PPRDateViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PersonsPageRank.objects.all()
+    serializer_class = PageRankDateListSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PersonsPageRankFilter
+
+    def groupby(self, queryset):
+        if self.request.GET.get('groupby') == 'siteID':
+            return PersonsPageRankGroupSerializer(queryset, many=True)
+        else:
+            return PageRankDateListSerializer(queryset, many=True)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.groupby(queryset)
+        return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset().filter(personID__pk=kwargs.get('pk')))
         serializer = self.groupby(queryset)
         return Response(serializer.data)
 
@@ -258,7 +342,7 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        keyword = get_object_or_404(queryset, pk=kwargs['pk'])
+        keyword = get_object_or_404(queryset, pk=kwargs.get('pk'))
         serializer = KeyWordsListSerializer(keyword)
         return Response(serializer.data)
 
@@ -287,7 +371,7 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs['pk'])
+        instance = self.queryset.get(pk=kwargs.get('pk'))
         serializer = KeyWordsListSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
