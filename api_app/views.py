@@ -109,7 +109,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         for key, value in {'username': 'user_login',
                            'email': 'user_email',
                            'password': 'user_password',
-                           'is_staff': 'isAdmin'}.items():
+                           'is_staff': 'user_isadmin'}.items():
             for j in data.keys():
                 if value == j:
                     mod_data[key] = data.get(j, None)
@@ -146,6 +146,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
+        print(request.data)
         mod_data = self.modified_data(request.data)
         instance = self.queryset.get(pk=kwargs.get('pk'))
         serializer = UsersCreateUpdateSerializer(instance, data=mod_data, partial=True)

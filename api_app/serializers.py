@@ -43,7 +43,7 @@ class UsersListSerializer(ModelSerializer):
 class UsersCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'is_superuser')
+        fields = ('username', 'email', 'password', 'is_staff')
 
 
 # Sites ----------------------------------------------------------------------------------------------------------------
