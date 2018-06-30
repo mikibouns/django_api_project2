@@ -109,7 +109,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         for key, value in {'username': 'user_login',
                            'email': 'user_email',
                            'password': 'user_password',
-                           'is_staff': 'isAdmin'}.items():
+                           'is_staff': 'user_isadmin'}.items():
             for j in data.keys():
                 if value == j:
                     mod_data[key] = data.get(j, None)
