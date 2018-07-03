@@ -109,7 +109,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         for key, value in {'username': 'user_login',
                            'email': 'user_email',
                            'password': 'user_password',
-                           'is_staff': 'user_isadmin'}.items():
+                           'is_staff': 'isAdmin'}.items():
             for j in data.keys():
                 if value == j:
                     mod_data[key] = data.get(j, None)
@@ -140,33 +140,26 @@ class UsersViewSet(viewsets.ModelViewSet):
                  'token_auth': Token.objects.get(user=user).key}
                 , status=status.HTTP_201_CREATED
             )
-        return Response({
-                'success': 0,
-                'exception': ''
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        print(request.data)
         mod_data = self.modified_data(request.data)
-        instance = self.queryset.get(pk=kwargs.get('pk'))
-        serializer = UsersCreateUpdateSerializer(instance, data=mod_data, partial=True)
+        queryset = self.queryset.get(pk=kwargs.get('pk'))
+        serializer = UsersCreateUpdateSerializer(queryset, data=mod_data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(
                 {'success': 1}
                 , status=status.HTTP_201_CREATED
             )
-        return Response({
-            'success': 0,
-            'exception': serializer.ValidationError
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs.get('pk'))
+        queryset = self.queryset.get(pk=kwargs.get('pk'))
         try:
-            self.perform_destroy(instance)
+            self.perform_destroy(queryset)
         except Exception as e:
-            return Response({'success': 0, 'exception': e}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -199,10 +192,7 @@ class SitesViewSet(viewsets.ModelViewSet):
                 'persons_id': site.id}
                 , status=status.HTTP_201_CREATED
             )
-        return Response({
-            'success': 0,
-            'exception': 'Account could not be created with received data.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
@@ -213,10 +203,7 @@ class SitesViewSet(viewsets.ModelViewSet):
                 {'success': 1}
                 , status=status.HTTP_201_CREATED
             )
-        return Response({
-            'success': 0,
-            'exception': 'Account could not be created with received data.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
@@ -256,10 +243,7 @@ class PersonsViewSet(viewsets.ModelViewSet):
                 'persons_id': person.id}
                 , status=status.HTTP_201_CREATED
             )
-        return Response({
-            'success': 0,
-            'exception': 'Account could not be created with received data.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
@@ -270,17 +254,15 @@ class PersonsViewSet(viewsets.ModelViewSet):
                 {'success': 1}
                 , status=status.HTTP_201_CREATED
             )
-        return Response({
-            'success': 0,
-            'exception': 'Account could not be created with received data.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
         try:
             self.perform_destroy(instance)
         except Exception as e:
-            return Response({'success': 0, 'exception': e}, status=status.HTTP_400_BAD_REQUEST)
+            print(e)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -314,7 +296,8 @@ class PPRDateViewSet(viewsets.ReadOnlyModelViewSet):
     filter_class = PersonsPageRankFilter
 
     def groupby(self, queryset):
-        if self.request.GET.get('groupby') == 'siteID':
+        request_get = self.request.GET
+        if request_get.get('groupby') == 'siteID':
             return PersonsPageRankGroupSerializer(queryset, many=True)
         else:
             return PageRankDateListSerializer(queryset, many=True)
@@ -361,15 +344,10 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
                      'added_keywords': words_list}
                     , status=status.HTTP_201_CREATED
                 )
-            return Response({
-                'success': 0,
-                'exception': 'You do not have permission to perform this action.'
-            }, status=status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
-            return Response({
-                'success': 0,
-                'exception': e
-            }, status=status.HTTP_400_BAD_REQUEST)
+            print(e)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
@@ -380,7 +358,4 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
                 {'success': 1}
                 , status=status.HTTP_201_CREATED
             )
-        return Response({
-            'success': 0,
-            'exception': 'Account could not be created with received data.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
