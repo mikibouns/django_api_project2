@@ -31,7 +31,7 @@ persons_rank_date_r = views.PPRDateViewSet.as_view({'get': 'retrieve'})
 
 urlpatterns = [
     url(r'^$', views.APIRootView.as_view(), name='api_root'),
-    url(r'^api-token-auth/', auth_views.obtain_auth_token),
+    url(r'^api-token-auth/', auth_views.obtain_auth_token, name='token_auth'),
 
     url(r'^users/$', users_lc, name='users_lc'),
     url(r'^users/(?P<pk>\d+)/$', users_rud, name='users_rud'),
