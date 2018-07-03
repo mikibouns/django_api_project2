@@ -46,6 +46,11 @@ class APIRootView(APIView):
                 'comments': 'Описание доступных методов (этот документ)'
             },
             {
+                'api_url': reverse('v1:token_auth', request=request),
+                'method': 'post',
+                'comments': 'Для получения token, необходимо в теле запроса указать username и password пользователя в формате JSON'
+            },
+            {
                 'api_url': reverse('v1:users_lc', request=request),
                 'method': 'get',
                 'comments': 'Получить список пользователей'
