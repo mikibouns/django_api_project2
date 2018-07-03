@@ -1,2 +1,1 @@
-# django_api_project2
-rfhjkelfhjkwefrjilr
+# django_api_project
