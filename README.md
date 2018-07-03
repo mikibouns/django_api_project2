@@ -1,5 +1,5 @@
 # django_api_project
-install_manual.txt. вам поможет установить и настроить приложение для работы
+install_manual.txt. поможет вам установить и настроить приложение для работы
 
 ### Аутентификация:
 - Basic Auth
@@ -9,5 +9,5 @@ install_manual.txt. вам поможет установить и настрои
 
 - Token Auth
 
-  В header запроса передается  "Authorization: token_auth `<token>`" для аутентификации:
+  В header http запроса передается  "Authorization: token_auth `<token>`" для аутентификации:
   `curl -X GET http://127.0.0.1:8000/v1/ -H "Authorization: token_auth 34295a6efee00d4c775b8274619aa0ec7691fac6"`
