@@ -14,31 +14,19 @@
   + ***MacOS***  
      ```python3 install_env.py```  
 
-**Активация виртуальной среды**
-
-Активировать виртуальную можно следующим способом, для этого необходимо находиться
-   в каталоге проекта (django_api_project2):
-  + ***Windows***
-      ```
-      venv\Scripts\activate.bat
-      ```
+#### Активация виртуальной среды
+Активировать виртуальную можно следующим способом, для этого необходимо находиться в каталоге проекта (django_api_project2):  
+  + ***Windows***  
+      ```venv\Scripts\activate.bat```  
       > возможно прийдется указать абсолютный путь в файлу `activate.bat`
-  + ***Linux***
-      ```
-      . env/bin/activate
-      ```
-      или
-      ```
-      source env/bin/activate
-      ```
-  + ***MacOS***
-     ```
-     . env/bin/activate
-     ``` 
-     или
-     ```
-     source env/bin/activate
-     ```
+  + ***Linux***  
+      ```. env/bin/activate```  
+      или  
+      ```source env/bin/activate```  
+  + ***MacOS***  
+     ```. env/bin/activate```  
+     или  
+     ```source env/bin/activate```  
      > Деактивируется виртуальная среда командой `deactivate`
 
 **Команды выполняемые в виртуальной среде**
