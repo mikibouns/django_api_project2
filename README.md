@@ -38,12 +38,17 @@
       . env/bin/activate
       ```
       или
-      + source env/bin/activate
+      ```
+      source env/bin/activate
+      ```
    - MacOS
-     + . env/bin/activate 
-     
+     ```
+     . env/bin/activate
+     ``` 
      или
-     + source env/bin/activate
+     ```
+     source env/bin/activate
+     ```
 
 Деактивируется виртуальная среда командой deactivate
 
