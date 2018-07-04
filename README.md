@@ -17,7 +17,7 @@
 ### Активация виртуальной среды
 Активировать виртуальную можно следующим способом, для этого необходимо находиться в каталоге проекта (django_api_project2):  
   + *Windows*  
-      ```venv\Scripts\activate.bat```  
+      ```venv\Scripts\activate.bat```
       > возможно прийдется указать абсолютный путь в файлу `activate.bat`
   + *Linux*  
       ```. env/bin/activate```  
@@ -26,7 +26,7 @@
   + *MacOS*  
      ```. env/bin/activate```  
      или  
-     ```source env/bin/activate```  
+     ```source env/bin/activate```
      > Деактивируется виртуальная среда командой `deactivate`
 
 ### Команды выполняемые в виртуальной среде
@@ -64,4 +64,4 @@ API поддерживает 2-а вида аутентификации:
 
   - Для аутентификации в header http запроса передается  "Authorization: token_auth `<token>`":  
 ```curl -X GET http://127.0.0.1:8000/v1/ -H "Authorization: token_auth <token>"```
-> Срок жизни токена 30 дней
+  > Срок жизни токена 30 дней
