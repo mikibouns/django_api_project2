@@ -8,7 +8,9 @@
 2) запустить файл установки виртуальной среды [install_env.py](https://github.com/mikibouns/django_api_project2/blob/master/install_env.py), для этого необходимо
    находиться в каталоге проекта (django_api_project2):
    * Windows
-     `python install_env.py`
+     ```
+     python install_env.py
+     ```
    * Linux
      `python3 install_env.py` 
      
