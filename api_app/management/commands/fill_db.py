@@ -23,7 +23,6 @@ data_persons = [
     {
         'name': 'Путин',
         'addedBy': 'user1',
-
     },
     {
         'name': 'Трамп',

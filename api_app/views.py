@@ -38,8 +38,15 @@ from .filters import (
 
 
 class APIRootView(APIView):
+
     def get(self, request):
+        admin_path = request.build_absolute_uri()[:-3] + r'admin/'
         data = [
+            {
+                'api_url': admin_path,
+                'method': 'get',
+                'comments': 'Панель администратора(доступна только суперпользователю)'
+            },
             {
                 'api_url': request.build_absolute_uri(),
                 'method': 'get',
