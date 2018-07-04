@@ -36,7 +36,7 @@
 1) `python manage.py update_db` - удаляет созданные миграции и БД, затем
    создает заново
 
-2) `python manage.py fill_db` - очищает БД и заполняет ее снова тестовыми данными, тестовые данные для БД хранятся в [data_for_testing.py](https://github.com/mikibouns/django_api_project2/blob/master/data_for_testing.py) в формате JSON
+2) `python manage.py fill_db` - очищает БД и заполняет ее тестовыми данными которые хранятся в [data_for_testing.py](https://github.com/mikibouns/django_api_project2/blob/master/data_for_testing.py) в формате JSON
 
 > Команда для запуска сервера
 
