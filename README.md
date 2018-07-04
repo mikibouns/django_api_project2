@@ -30,7 +30,7 @@
    в каталоге проекта (django_api_project2):
   + ***Windows***
       ```
-      dir /fonts venv\Scripts\activate.bat
+      venv\Scripts\activate.bat
       ```
       > возможно прийдется указать абсолютный путь в файлу activate.bat
   + ***Linux***
