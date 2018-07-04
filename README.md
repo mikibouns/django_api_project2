@@ -5,25 +5,25 @@
 ## Установка и настройка:
 
 Установить python версией не ниже 3.4 ==> https://www.python.org/downloads/ далее, запустить файл установки виртуальной среды [install_env.py](https://github.com/mikibouns/django_api_project2/blob/master/install_env.py), для этого необходимо находиться в каталоге проекта (django_api_project2):
-  + ***Windows***  
+  + *Windows*  
      ```python install_env.py```
-  + ***Linux***  
+  + *Linux*  
      ```python3 install_env.py```   
      или  
      ```chmod +x install_env.py && ./install_env.py```  
-  + ***MacOS***  
+  + *MacOS*  
      ```python3 install_env.py```  
 
 #### Активация виртуальной среды
 Активировать виртуальную можно следующим способом, для этого необходимо находиться в каталоге проекта (django_api_project2):  
-  + ***Windows***  
+  + *Windows*  
       ```venv\Scripts\activate.bat```  
       > возможно прийдется указать абсолютный путь в файлу `activate.bat`
-  + ***Linux***  
+  + *Linux*  
       ```. env/bin/activate```  
       или  
       ```source env/bin/activate```  
-  + ***MacOS***  
+  + *MacOS*  
      ```. env/bin/activate```  
      или  
      ```source env/bin/activate```  
