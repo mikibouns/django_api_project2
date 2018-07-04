@@ -7,14 +7,14 @@
 1) установить python версией не ниже 3.4 ==> https://www.python.org/downloads/
 2) запустить файл установки виртуальной среды [install_env.py](https://github.com/mikibouns/django_api_project2/blob/master/install_env.py), для этого необходимо
    находиться в каталоге проекта (django_api_project2):
-   * Windows
-	- python install_env.py
-   * Linux
-	- python3 install_env.py
+   + ul Windows
+	+ ul python install_env.py
+   + ul Linux
+	+ ul python3 install_env.py
 	или
-	- chmod +x install_env.py && ./install_env.py
-   * MacOS
-	- python3 install_env.py
+	+ ul chmod +x install_env.py && ./install_env.py
+   + ul MacOS
+	+ ul python3 install_env.py
 
 > **Активация виртуальной среды**
 
