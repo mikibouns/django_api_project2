@@ -9,7 +9,7 @@
    находиться в каталоге проекта (django_api_project2):
    + Windows
      ```diff
-     + python install_env.py
+     python install_env.py
      ```
    + Linux
      ```
