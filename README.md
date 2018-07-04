@@ -1,7 +1,7 @@
 # django_api_project
 [Аутентификация](#Аутентификация)
-
-
+[Установка и настройка](#Установка и настройка)
+### Установка и настройка:
 
 [install_manual.txt](https://github.com/mikibouns/django_api_project2/blob/master/install_manual.txt) поможет вам установить и настроить приложение для работы
 
