@@ -1,5 +1,5 @@
 # django_api_project
-[Аутентификация](https://github.com/mikibouns/django_api_project2/blob/master/README.md#%D0%90%D1%83%D1%82%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%86%D0%B8%D1%8F)
+[Аутентификация](#Аутентификация)
 
 
 
