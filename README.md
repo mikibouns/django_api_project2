@@ -1,5 +1,5 @@
 # django_api_project
-install_manual.txt. поможет вам установить и настроить приложение для работы
+[install_manual.txt](https://github.com/mikibouns/django_api_project2/blob/master/install_manual.txt) поможет вам установить и настроить приложение для работы
 
 ### Аутентификация:
 После [установки и настройки](https://github.com/mikibouns/django_api_project2/blob/master/install_manual.txt) проекта вам будет доступна панель администрирования по адресу http://127.0.0.1:8000/admin/.
