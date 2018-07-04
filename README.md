@@ -65,8 +65,3 @@ API поддерживает 2-а вида аутентификации:
   - Для аутентификации в header http запроса передается  "Authorization: token_auth `<token>`":  
 ```curl -X GET http://127.0.0.1:8000/v1/ -H "Authorization: token_auth <token>"```
     > Срок жизни токена 30 дней
-
-| HTTP Type | API URL | Options | Response | Bad response| Comments |
-|---------------|-----------|------------| -------------| -----------------|---------------|
-|GET| http://127.0.0.1:8000/v1/ |  |  |  |  | Получаем список доступных адресов API |
-|GET| http://127.0.0.1:8000/v1/users/ |  | [{"user_id": 17, "user_login": "user1", "user_email": "user1@mail.com", "user_isadmin": 0, "user_addedby": null}, ...] | {"message": 403, "success": 0,"exception": "You do not have permission to perform this action."} | Получаем список пользователей (доступно только для Администраторов)|
