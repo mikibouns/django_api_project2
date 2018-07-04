@@ -30,7 +30,7 @@
       ```
       venv\Scripts\activate.bat
       ```
-      > возможно прийдется указать абсолютный путь в файлу activate.bat
+      > возможно прийдется указать абсолютный путь в файлу `activate.bat`
   + ***Linux***
       ```
       . env/bin/activate
