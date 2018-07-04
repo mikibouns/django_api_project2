@@ -64,3 +64,4 @@ API поддерживает 2-а вида аутентификации:
 
   - Для аутентификации в header http запроса передается  "Authorization: token_auth `<token>`":  
 ```curl -X GET http://127.0.0.1:8000/v1/ -H "Authorization: token_auth <token>"```
+> Срок жизни токена 30 дней
