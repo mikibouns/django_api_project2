@@ -11,6 +11,7 @@
      + ul python install_env.py
    * ul Linux
      + ul python3 install_env.py 
+     
      или
      + ul chmod +x install_env.py && ./install_env.py
    * ul MacOS
@@ -21,16 +22,18 @@
 1) активировать виртуальную можно следующим способом, для этого необходимо находиться
    в каталоге проекта (django_api_project2):
    * Windows
-	- dir /fonts venv\Scripts\activate.bat
+      + dir /fonts venv\Scripts\activate.bat
 	!!!возможно прийдется указать абсолютный путь в файлу activate.bat!!!
    * Linux
-	- . env/bin/activate
-	или
-	- source env/bin/activate
+      + . env/bin/activate
+      
+      или
+      + source env/bin/activate
    * MacOS
-	- . env/bin/activate
-	или
-	- source env/bin/activate
+     + . env/bin/activate 
+     
+     или
+     + source env/bin/activate
 
 Деактивируется виртуальная среда командой deactivate
 
