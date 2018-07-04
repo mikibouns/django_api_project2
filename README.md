@@ -12,12 +12,17 @@
      python install_env.py
      ```
    * Linux
-     `python3 install_env.py` 
-     
+     ```
+     python3 install_env.py
+     ``` 
      или
-     + chmod +x install_env.py && ./install_env.py
+     ```
+     chmod +x install_env.py && ./install_env.py
+     ```  
    * MacOS
-     + python3 install_env.py
+     ```
+     python3 install_env.py
+     ```
 
 **Активация виртуальной среды**
 
