@@ -2,7 +2,10 @@
 install_manual.txt. поможет вам установить и настроить приложение для работы
 
 ### Аутентификация:
-
+После установки и настройки проекта вам будет доступна панель администрирования по адресу http://127.0.0.1:8000/admin/.
+Все функции административной панели доступнв суперпользователю, учетные данные следующие: 
+- `login: admin`
+- `password: admins_password`
 
 - Basic Auth
 
@@ -14,4 +17,4 @@ install_manual.txt. поможет вам установить и настрои
 Чтобы получить токен пользователя необходимо совершить `POST` запрос по адресу `http://127.0.0.1:8000/v1/api-token-auth/` передав в теле запроса `{"username": "<username>", "password": "<password>"}` в формате JSON, в ответ вы получите `{"token": "<token>"}` 
 
 Для аутентификации в header http запроса передается  "Authorization: token_auth `<token>`":
-`curl -X GET http://127.0.0.1:8000/v1/ -H "Authorization: token_auth 34295a6efee00d4c775b8274619aa0ec7691fac6"`
+`curl -X GET http://127.0.0.1:8000/v1/ -H "Authorization: token_auth <token>"`
