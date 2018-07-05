@@ -26,5 +26,5 @@ urlpatterns = [
     url(r'^v1/', include('api_app.urls', namespace='v1')),
     # url(r'^auth/', include('auth_app.urls')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^$', schema_view)
+    url(r'^$', schema_view, name="schema_view"),
 ]

@@ -155,3 +155,19 @@ REST_FRAMEWORK = {
 }
 
 TOKEN_EXPIRE_TIME = datetime.timedelta(days=30) # token setting expiring time
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'api_version': '0.1',
+    'enabled_methods': [
+        'get',
+        'post',
+    ],
+    'SECURITY_DEFINITIONS': {
+        "api_key": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+          },
+    },
+}
