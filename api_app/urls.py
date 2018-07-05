@@ -28,6 +28,8 @@ persons_keywords_lc = views.KeyWordsViewSet.as_view({'get': 'list', 'post': 'cre
 persons_keywords_rud = views.KeyWordsViewSet.as_view({'get': 'retrieve', 'patch': 'update', 'delete': 'destroy'})
 sites_lc = views.SitesViewSet.as_view({'get': 'list', 'post': 'create'})
 sites_rud = views.SitesViewSet.as_view({'get': 'retrieve', 'patch': 'update', 'delete': 'destroy'})
+pages_lc = views.PagesViewSet.as_view({'get': 'list', 'post': 'create'})
+pages_rud = views.PagesViewSet.as_view({'get': 'retrieve', 'patch': 'update', 'delete': 'destroy'})
 persons_rank_date_lc = views.PPRDateViewSet.as_view({'get': 'list'})
 persons_rank_date_r = views.PPRDateViewSet.as_view({'get': 'retrieve'})
 
@@ -53,4 +55,7 @@ urlpatterns = [
 
     url(r'^sites/$', sites_lc, name='sites_lc'),
     url(r'^sites/(?P<pk>\d+)/$', sites_rud, name='sites_rud'),
+
+    url(r'^pages/$', pages_lc, name='pages_lc'),
+    url(r'^pages/(?P<pk>\d+)/$', pages_rud, name='pages_rud'),
 ]

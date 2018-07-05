@@ -14,7 +14,9 @@ from api_app.models import (
     Sites,
     Persons,
     PersonsPageRank,
-    KeyWords)
+    KeyWords,
+    Pages
+)
 
 from .serializers import (
     UsersListSerializer,
@@ -24,13 +26,21 @@ from .serializers import (
     PersonsCreateUpdateSerializer,
     SitesListSerializer,
     SitesCreateUpdateSerializer,
+    SitesDetailSerializer,
     PersonsPageRankListSerializer,
     PersonsPageRankGroupSerializer,
     PageRankDateListSerializer,
     KeyWordsEditSerializer,
-    KeyWordsListSerializer)
+    KeyWordsListSerializer,
+    PagesCreateUpdateSerializer,
+    PagesListSerializer,
+)
 
-from .permissions import IsOwnerOrReadOnly, IsOwnerOrReadOnlyKeyWords
+from .permissions import (
+    IsOwnerOrReadOnly,
+    IsOwnerOrReadOnlyKeyWords,
+    IsOwnerOrReadOnlyPages,
+)
 
 from .filters import (
     PersonsFilter,
@@ -99,6 +109,16 @@ class APIRootView(APIView):
                 'comments': 'Получить сайт по site_id = 1'
             },
             {
+                'api_url': reverse('v1:pages_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список страниц'
+            },
+            {
+                'api_url': reverse('v1:pages_rud', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить страницу по page_id = 1'
+            },
+            {
                 'api_url': reverse('v1:ppr_date_lc', request=request),
                 'method': 'get',
                 'comments': 'Получить список персон с их рангами по всем сайтам c информацией о периоде времени'
@@ -163,18 +183,12 @@ class UsersViewSet(viewsets.ModelViewSet):
         serializer = UsersCreateUpdateSerializer(queryset, data=mod_data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                {'success': 1}
-                , status=status.HTTP_201_CREATED
-            )
+            return Response({'success': 1}, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         queryset = self.queryset.get(pk=kwargs.get('pk'))
-        try:
-            self.perform_destroy(queryset)
-        except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(queryset)
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -216,18 +230,12 @@ class SitesViewSet(viewsets.ModelViewSet):
         serializer = SitesCreateUpdateSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                {'success': 1}
-                , status=status.HTTP_201_CREATED
-            )
+            return Response({'success': 1}, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
-        try:
-            self.perform_destroy(instance)
-        except Exception as e:
-            return Response({'success': 0, 'exception': e}, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(instance)
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -267,19 +275,12 @@ class PersonsViewSet(viewsets.ModelViewSet):
         serializer = PersonsCreateUpdateSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                {'success': 1}
-                , status=status.HTTP_201_CREATED
-            )
+            return Response({'success': 1}, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
-        try:
-            self.perform_destroy(instance)
-        except Exception as e:
-            print(e)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(instance)
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -370,8 +371,51 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
         serializer = KeyWordsListSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                {'success': 1}
-                , status=status.HTTP_201_CREATED
-            )
+            return Response({'success': 1}, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
+
+
+class PagesViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyPages]
+    queryset = Pages.objects.all()
+    serializer_class = PagesCreateUpdateSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head']
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(Sites.objects.all())
+        serializer = SitesDetailSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        urls = get_object_or_404(queryset, pk=kwargs.get('pk'))
+        serializer = PagesListSerializer(urls)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        page_id = self.queryset.get(URL=request.data['URL'])
+        return Response({'success': 1,
+                         'page_id': page_id.id,
+                         }, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response({'success': 1}, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)

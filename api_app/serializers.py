@@ -60,7 +60,29 @@ class SitesCreateUpdateSerializer(ModelSerializer):
         fields = ('name', 'siteDescription')
 
 
+class SitesDetailSerializer(ModelSerializer):
+    pages = SerializerMethodField()
+    site_id = SerializerMethodField()
+    site_name = SerializerMethodField()
+
+    class Meta:
+        model = Sites
+        fields = ('site_id', 'site_name', 'pages')
+
+    def get_pages(self, obj):
+        data = PagesDetailSerializer(obj.pages_children(), many=True).data
+        if data:
+            return data
+        return None
+
+    def get_site_id(self, obj):
+        return int(obj.id)
+
+    def get_site_name(self, obj):
+        return str(obj.name)
+
 # Persons --------------------------------------------------------------------------------------------------------------
+
 
 class PersonsListSerializer(ModelSerializer):
     addedBy = SerializerMethodField()
@@ -77,6 +99,7 @@ class PersonsListSerializer(ModelSerializer):
 class PersonsDetailSerializer(ModelSerializer):
     # addedBy = SerializerMethodField()
     keywords = SerializerMethodField()
+
     class Meta:
         model = Persons
         fields = ('id', 'name', 'keywords')
@@ -185,6 +208,24 @@ class PagesGiveSerializer(ModelSerializer):
         model = Pages
         fields = ('foundDateTime', 'lastScanDate')
 
+
+class PagesListSerializer(ModelSerializer):
+    class Meta:
+        model = Pages
+        fields = ('id', 'URL', 'siteID')
+
+
+class PagesDetailSerializer(ModelSerializer):
+    class Meta:
+        model = Pages
+        fields = ('id', 'URL')
+
+
+class PagesCreateUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = Pages
+        fields = ('URL', 'siteID')
+
 # KeyWords -------------------------------------------------------------------------------------------------------------
 
 
@@ -207,3 +248,5 @@ class LogSerializer(ModelSerializer):
     class Meta:
         model = Log
         fields = ('adminID', 'action', 'logDate')
+
+

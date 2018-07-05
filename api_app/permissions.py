@@ -23,3 +23,12 @@ class IsOwnerOrReadOnlyKeyWords(IsOwnerOrReadOnly):
         if request.method in SAFE_METHODS:
             return True
         return obj.personID.addedBy == request.user or request.user.is_superuser
+
+
+class IsOwnerOrReadOnlyPages(IsOwnerOrReadOnly):
+    my_safe_method = ['GET', 'PATCH', 'POST', 'DELETE']
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return obj.siteID.addedBy == request.user or request.user.is_superuser
