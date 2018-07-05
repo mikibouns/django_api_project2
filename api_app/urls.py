@@ -24,10 +24,13 @@ persons_lc = views.PersonsViewSet.as_view({'get': 'list', 'post': 'create'})
 persons_rud = views.PersonsViewSet.as_view({'get': 'retrieve', 'patch': 'update', 'delete': 'destroy'})
 persons_rank_lc = views.PersonsPageRankViewSet.as_view({'get': 'list'})
 persons_rank_rud = views.PersonsPageRankViewSet.as_view({'get': 'retrieve'})
+persons_keywords_lc = views.KeyWordsViewSet.as_view({'get': 'list', 'post': 'create'})
+persons_keywords_rud = views.KeyWordsViewSet.as_view({'get': 'retrieve', 'patch': 'update', 'delete': 'destroy'})
 sites_lc = views.SitesViewSet.as_view({'get': 'list', 'post': 'create'})
 sites_rud = views.SitesViewSet.as_view({'get': 'retrieve', 'patch': 'update', 'delete': 'destroy'})
 persons_rank_date_lc = views.PPRDateViewSet.as_view({'get': 'list'})
 persons_rank_date_r = views.PPRDateViewSet.as_view({'get': 'retrieve'})
+
 
 urlpatterns = [
     url(r'^$', views.APIRootView.as_view(), name='api_root'),
@@ -35,6 +38,9 @@ urlpatterns = [
 
     url(r'^users/$', users_lc, name='users_lc'),
     url(r'^users/(?P<pk>\d+)/$', users_rud, name='users_rud'),
+
+    url(r'^persons/keywords/$', persons_keywords_lc, name='keywords_lc'),
+    url(r'^persons/keywords/(?P<pk>\d+)/$', persons_keywords_rud, name='keywords_rud'),
 
     url(r'^persons/rank/$', persons_rank_lc, name='ppr_lc'),
     url(r'^persons/rank/(?P<pk>\d+)/$', persons_rank_rud, name='ppr_rud'),

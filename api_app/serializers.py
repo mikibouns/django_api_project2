@@ -74,7 +74,7 @@ class PersonsListSerializer(ModelSerializer):
         return str(obj.addedBy.username)
 
 
-class PersonsDitailListSerializer(ModelSerializer):
+class PersonsDetailSerializer(ModelSerializer):
     # addedBy = SerializerMethodField()
     keywords = SerializerMethodField()
     class Meta:
@@ -177,7 +177,7 @@ class PageRankDateListSerializer(ModelSerializer):
     def get_rank(self, obj):
         return str(obj.rank)
 
-# ----------------------------------------------------------------------------------------------------------------------
+# Pages ----------------------------------------------------------------------------------------------------------------
 
 
 class PagesGiveSerializer(ModelSerializer):
@@ -195,18 +195,10 @@ class KeyWordsListSerializer(ModelSerializer):
 
 
 class KeyWordsEditSerializer(ModelSerializer):
-    # keywords = SerializerMethodField()
     keywords = CharField(required=False, allow_blank=True, max_length=100)
     class Meta:
         model = KeyWords
         fields = ('personID', 'keywords')
-
-
-    def get_keywords(self, obj):
-        data = KeyWordsListSerializer(obj.keywords_children(), many=True).data
-        if data:
-            return data
-        return None
 
 
 # Log ------------------------------------------------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 # from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
+
 from django_filters.rest_framework import DjangoFilterBackend
 # from django.contrib.auth.models import User
 from auth_app.models import User
@@ -8,7 +9,6 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
-from rest_framework.decorators import action, list_route, detail_route
 
 from api_app.models import (
     Sites,
@@ -20,7 +20,7 @@ from .serializers import (
     UsersListSerializer,
     UsersCreateUpdateSerializer,
     PersonsListSerializer,
-    PersonsDitailListSerializer,
+    PersonsDetailSerializer,
     PersonsCreateUpdateSerializer,
     SitesListSerializer,
     SitesCreateUpdateSerializer,
@@ -34,7 +34,9 @@ from .permissions import IsOwnerOrReadOnly, IsOwnerOrReadOnlyKeyWords
 
 from .filters import (
     PersonsFilter,
-    PersonsPageRankFilter)
+    PersonsPageRankFilter,
+    UsersFilter,
+)
 
 
 class APIRootView(APIView):
@@ -65,6 +67,16 @@ class APIRootView(APIView):
                 'api_url': reverse('v1:persons_rud', args=[1], request=request),
                 'method': 'get',
                 'comments': 'Получить ключевые слова для person_id = 1'
+            },
+            {
+                'api_url': reverse('v1:keywords_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список слов'
+            },
+            {
+                'api_url': reverse('v1:keywords_rud', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить слово по id'
             },
             {
                 'api_url': reverse('v1:ppr_lc', request=request),
@@ -104,6 +116,8 @@ class UsersViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsOwnerOrReadOnly]
     queryset = User.objects.all()
     serializer_class = UsersListSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = UsersFilter
 
     def modified_data(self, data):
         mod_data = {}
@@ -169,6 +183,8 @@ class SitesViewSet(viewsets.ModelViewSet):
     queryset = Sites.objects.all()
     serializer_class = SitesCreateUpdateSerializer
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('name', 'addedBy')
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -231,7 +247,7 @@ class PersonsViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         person = get_object_or_404(queryset, pk=kwargs.get('pk'))
-        serializer = PersonsDitailListSerializer(person)
+        serializer = PersonsDetailSerializer(person)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
@@ -321,8 +337,8 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = PersonsDitailListSerializer(queryset, many=True)
+        queryset = self.filter_queryset(Persons.objects.all())
+        serializer = PersonsDetailSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
@@ -332,7 +348,6 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         try:
             person = Persons.objects.get(id=request.data['personID'])
             if person.addedBy == request.user or request.user.is_superuser:
