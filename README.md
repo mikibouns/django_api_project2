@@ -37,7 +37,7 @@
 1) `python manage.py update_db` - удаляет созданные миграции и БД, затем
    создает заново
 
-2) `python manage.py fill_db` - очищает БД и заполняет ее тестовыми данными которые хранятся в [data_for_testing.py](https://github.com/mikibouns/django_api_project2/blob/master/data_for_testing.py) в формате JSON
+2) `python manage.py fill_db` - очищает БД и заполняет ее тестовыми данными которые хранятся в [data_for_testing.json](https://github.com/mikibouns/django_api_project2/blob/master/data_for_testing.json) в формате JSON
 
 > Команда для запуска сервера
 
@@ -54,7 +54,7 @@ login: admin
 password: admins_password
 ```
 
-## Аутентификация:
+<## Аутентификация:
 API поддерживает 2-а вида аутентификации:
 - Basic Auth  
   - Стандартная аутентификация использующая логин и пароль:  
@@ -65,23 +65,4 @@ API поддерживает 2-а вида аутентификации:
 
   - Для аутентификации в header http запроса передается  "Authorization: token_auth `<token>`":  
 ```curl -X GET http://127.0.0.1:8000/v1/ -H "Authorization: token_auth <token>"```
-    > Срок жизни токена 30 дней
-    
-## Соглашение:
-> Данное соглашение определяет формат обмена данными  
-### Ошибки
-*Формат:* **JSON**  
-
-*Возвращаемые значения:*
-  - `message` - номер HTTP ошибки (400, 403, 404, 500 ...)
-  - `success` - 0
-  - `exception` - описание ошибки  
-
-*Пример:*
-```
-{
-    "message": 403,
-    "success": 0,
-    "exception": "Authentication credentials were not provided."
-}
-```
+    > Срок жизни токена 30 дней>
