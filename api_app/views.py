@@ -69,6 +69,26 @@ class APIRootView(APIView):
                 'comments': 'Получить пользователя c id = 1'
             },
             {
+                'api_url': reverse('v1:sites_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список сайтов'
+            },
+            {
+                'api_url': reverse('v1:sites_rud', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить сайт по site_id = 1'
+            },
+            {
+                'api_url': reverse('v1:pages_lc', request=request),
+                'method': 'get',
+                'comments': 'Получить список страниц'
+            },
+            {
+                'api_url': reverse('v1:pages_rud', args=[1], request=request),
+                'method': 'get',
+                'comments': 'Получить страницу по page_id = 1'
+            },
+            {
                 'api_url': reverse('v1:persons_lc', request=request),
                 'method': 'get',
                 'comments': 'Получить список персон'
@@ -97,26 +117,6 @@ class APIRootView(APIView):
                 'api_url': reverse('v1:ppr_rud', args=[1], request=request),
                 'method': 'get',
                 'comments': 'Получить список рангов по всем сайтам для person_id = 1'
-            },
-            {
-                'api_url': reverse('v1:sites_lc', request=request),
-                'method': 'get',
-                'comments': 'Получить список сайтов'
-            },
-            {
-                'api_url': reverse('v1:sites_rud', args=[1], request=request),
-                'method': 'get',
-                'comments': 'Получить сайт по site_id = 1'
-            },
-            {
-                'api_url': reverse('v1:pages_lc', request=request),
-                'method': 'get',
-                'comments': 'Получить список страниц'
-            },
-            {
-                'api_url': reverse('v1:pages_rud', args=[1], request=request),
-                'method': 'get',
-                'comments': 'Получить страницу по page_id = 1'
             },
             {
                 'api_url': reverse('v1:ppr_date_lc', request=request),
