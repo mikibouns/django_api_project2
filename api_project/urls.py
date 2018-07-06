@@ -15,19 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from rest_framework.schemas import get_schema_view
-from rest_framework_raml.renderers import RAMLRenderer, RAMLDocsRenderer
 
-
-schema_view = get_schema_view(
-    title='Example API',
-    renderer_classes=[RAMLRenderer, RAMLDocsRenderer]
-)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^v1/', include('api_app.urls', namespace='v1')),
     # url(r'^auth/', include('auth_app.urls')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^raml/$', schema_view),
 ]
