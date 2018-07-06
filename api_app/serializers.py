@@ -45,8 +45,14 @@ class UsersCreateUpdateSerializer(ModelSerializer):
         model = User
         fields = ('username', 'email', 'password', 'is_staff')
 
+    def create(self, validated_data):
+        user = super(UsersCreateUpdateSerializer, self).create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 # Sites ----------------------------------------------------------------------------------------------------------------
+
 
 class SitesListSerializer(ModelSerializer):
     class Meta:
