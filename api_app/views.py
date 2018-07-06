@@ -56,7 +56,7 @@ class APIRootView(APIView):
             {
                 'api_url': request.build_absolute_uri(),
                 'method': 'get',
-                'comments': 'Описание доступных методов (этот документ)'
+                'comments': 'Доступные url (этот документ)'
             },
             {
                 'api_url': reverse('v1:users_lc', request=request),
