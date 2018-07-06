@@ -171,7 +171,6 @@ class UsersViewSet(viewsets.ModelViewSet):
         serializer = UsersCreateUpdateSerializer(data=mod_data)
         if serializer.is_valid():
             user = User.objects.create_user(**serializer.validated_data)
-            user.is_staff = True
             user.addedBy = request.user
             user.save()
             return Response(
@@ -372,9 +371,11 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs.get('pk'))
-        serializer = KeyWordsListSerializer(instance, data=request.data, partial=True)
+        queryset = self.queryset.get(pk=kwargs.get('pk'))
+        serializer = KeyWordsListSerializer(queryset, data=request.data, partial=True)
+        print(serializer)
         if serializer.is_valid():
+
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
