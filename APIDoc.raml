@@ -1,0 +1,216 @@
+#%RAML 1.0
+---
+title: Django_api_project
+version: v1
+baseUri: http://127.0.0.1:8000/{version}
+
+/schema:
+  get:
+    description:
+      Схема API
+    responses:
+      200:
+        description:
+          Получаем схему API
+        body:
+          application/json:
+            example:
+              {
+                "_type": "document",
+                "_meta": {
+                    "url": "http://127.0.0.1:8000/v1/schema/",
+                    "title": "Django-api-project"
+                },
+                "v1": {
+                    "api-token-auth": {
+                        "create": {
+                            "_type": "link",
+                            "url": "/v1/api-token-auth/",
+                            "action": "post",
+                            "encoding": "application/json",
+                            "fields": [
+                                {
+                                    "name": "username",
+                                    "required": true,
+                                    "location": "form",
+                                    "schema": {
+                                        "_type": "string",
+                                        "title": "Username",
+                                        "description": "Valid username for authentication"
+                                    }
+                                },
+                                {
+                                    "name": "password",
+                                    "required": true,
+                                    "location": "form",
+                                    "schema": {
+                                        "_type": "string",
+                                        "title": "Password",
+                                        "description": "Valid password for authentication"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                  }
+              }
+      403:
+        body:
+          application/json:
+            example:
+              {
+                  "message": 403,
+                  "success": 0,
+                  "exception": "Invalid token."
+              }
+/users:
+  get:
+    description:
+      Получаем список пользователей
+    queryParameters:
+      user_login:
+        type:
+          string
+        description:
+          Фильтрация по имени пользователя
+        example:
+          http://127.0.0.1:8000/v1/users/?user_login=user1
+      user_email:
+        type:
+          string
+        description:
+          Фильтрация по названию элекстронной почты
+        example:
+          http://127.0.0.1:8000/v1/users/?user_email=user1@mail.com
+      user_isadmin:
+        type:
+          string
+        description:
+           Фильтрация по статусу администратора
+        example:
+          http://127.0.0.1:8000/v1/users/?user_isadmin=0
+      user_addedby:
+        type:
+          string
+        description:
+          Фильтрация по создателю пользователя
+        example:
+          http://127.0.0.1:8000/v1/users/?user_addedby=4
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              [
+                  {
+                      "user_id": 1,
+                      "user_login": "user1",
+                      "user_email": "user1@mail.com",
+                      "user_isadmin": 0,
+                      "user_addedby": 4
+                  },
+                  {
+                      "user_id": 2,
+                      "user_login": "user2",
+                      "user_email": "user2@mail.com",
+                      "user_isadmin": 0,
+                      "user_addedby": 4
+                  },
+                  {
+                      "user_id": 3,
+                      "user_login": "user3",
+                      "user_email": "user3@mail.com",
+                      "user_isadmin": 0,
+                      "user_addedby": 4
+                  },
+                  {
+                      "user_id": 4,
+                      "user_login": "admin",
+                      "user_email": "admin@mail.com",
+                      "user_isadmin": 1,
+                      "user_addedby": 4
+                  }
+              ]
+      403:
+        description:
+          Если нет прав для доступа к данным
+        body:
+          application/json:
+            example:
+              {
+                  "message": 403,
+                  "success": 0,
+                  "exception": "You do not have permission to perform this action."
+              }
+  post:
+    description:
+      Создание пользователя
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              {
+                  "success": 1,
+                  "user_id": 5,
+                  "token_auth": "fe453010d44559f5e1047f626dc31640c77794fd"
+              }
+      400:
+        body:
+          application/json:
+            example:
+              {
+                  "message": 400,
+                  "success": 0,
+                  "exception": "JSON parse error - Extra data: line 1 column 3 (char 2)"
+              }
+
+      415:
+        body:
+          application/json:
+            example:
+              {
+                  "message": 415,
+                  "success": 0,
+                  "exception": "Unsupported media type \"text/plain\" in request."
+              }
+  /{id}:
+    get:
+    patch:
+    delete:
+/sites:
+  get:
+  post:
+  /{id}:
+    get:
+    patch:
+    delete:
+/pages:
+  get:
+  post:
+  /{id}:
+    get:
+    patch:
+    delete:
+/keywords:
+  get:
+  post:
+  /{id}:
+    get:
+    patch:
+    delete:
+/persons:
+  get:
+  post:
+  /{id}:
+    get:
+    patch:
+    delete:
+  /rank:
+    get:
+    /date:
+      get:
+    /{id}:
+      get:
+      /date:
+        get:
