@@ -1,9 +1,12 @@
-from django.conf.urls import url, include
+from django.conf.urls import url
 from . import views
 from rest_framework.authtoken import views as auth_views
+from rest_framework.schemas import get_schema_view
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework import routers
 
+
+schema_view = get_schema_view(title='Django-api-project')
 
 # router = routers.DefaultRouter()
 # router.register(r'users', views.UsersViewSet, base_name='user')
@@ -36,6 +39,7 @@ persons_rank_date_r = views.PPRDateViewSet.as_view({'get': 'retrieve'})
 
 urlpatterns = [
     url(r'^$', views.APIRootView.as_view(), name='api_root'),
+    url(r'^schema/$', schema_view, name='schema'),
     url(r'^api-token-auth/', auth_views.obtain_auth_token, name='token_auth'),
 
     url(r'^users/$', users_lc, name='users_lc'),
