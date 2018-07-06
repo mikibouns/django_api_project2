@@ -151,7 +151,7 @@ class UsersViewSet(viewsets.ModelViewSet):
                            'password': 'user_password',
                            'is_staff': 'user_isadmin'}.items():
             for j in data.keys():
-                if value == j:
+                if value == j or key == j:
                     mod_data[key] = data.get(j, None)
         return mod_data
 
