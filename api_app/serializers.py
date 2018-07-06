@@ -206,7 +206,7 @@ class PageRankDateListSerializer(ModelSerializer):
 class PagesGiveSerializer(ModelSerializer):
     class Meta:
         model = Pages
-        fields = ('foundDateTime', 'lastScanDate')
+        fields = ('id', 'foundDateTime', 'lastScanDate')
 
 
 class PagesListSerializer(ModelSerializer):
