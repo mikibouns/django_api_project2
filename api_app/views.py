@@ -151,7 +151,7 @@ class UsersViewSet(viewsets.ModelViewSet):
                            'password': 'user_password',
                            'is_staff': 'user_isadmin'}.items():
             for j in data.keys():
-                if value == j:
+                if value == j or key == j:
                     mod_data[key] = data.get(j, None)
         return mod_data
 
@@ -170,17 +170,15 @@ class UsersViewSet(viewsets.ModelViewSet):
         mod_data = self.modified_data(request.data)
         serializer = UsersCreateUpdateSerializer(data=mod_data)
         if serializer.is_valid():
-            user = User.objects.create_user(**serializer.validated_data)
-            user.is_staff = True
-            user.addedBy = request.user
-            user.save()
-            return Response(
-                {'success': 1,
-                 'user_id': user.id,
-                 'token_auth': Token.objects.get(user=user).key}
-                , status=status.HTTP_201_CREATED
-            )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            user = User.objects.get(username=serializer.data['username'])
+            return Response({'success': 1,
+                             'user_id': user.id,
+                             'token_auth': Token.objects.get(user=user).key}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'success': 0,
+                             'expection': serializer._errors,
+                             'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         mod_data = self.modified_data(request.data)
@@ -372,9 +370,11 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        instance = self.queryset.get(pk=kwargs.get('pk'))
-        serializer = KeyWordsListSerializer(instance, data=request.data, partial=True)
+        queryset = self.queryset.get(pk=kwargs.get('pk'))
+        serializer = KeyWordsListSerializer(queryset, data=request.data, partial=True)
+        print(serializer)
         if serializer.is_valid():
+
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
