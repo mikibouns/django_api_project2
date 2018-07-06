@@ -170,16 +170,15 @@ class UsersViewSet(viewsets.ModelViewSet):
         mod_data = self.modified_data(request.data)
         serializer = UsersCreateUpdateSerializer(data=mod_data)
         if serializer.is_valid():
-            user = User.objects.create_user(**serializer.validated_data)
-            user.addedBy = request.user
-            user.save()
-            return Response(
-                {'success': 1,
-                 'user_id': user.id,
-                 'token_auth': Token.objects.get(user=user).key}
-                , status=status.HTTP_201_CREATED
-            )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            user = User.objects.get(username=serializer.data['username'])
+            return Response({'success': 1,
+                             'user_id': user.id,
+                             'token_auth': Token.objects.get(user=user).key}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'success': 0,
+                             'expection': serializer._errors,
+                             'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         mod_data = self.modified_data(request.data)
