@@ -48,6 +48,8 @@ from .filters import (
     UsersFilter,
 )
 
+from .logging import LoggingMixin
+
 
 class APIRootView(APIView):
 
@@ -137,7 +139,7 @@ class APIRootView(APIView):
         return Response(data)
 
 
-class UsersViewSet(viewsets.ModelViewSet):
+class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsOwnerOrReadOnly]
     queryset = User.objects.all()
     serializer_class = UsersListSerializer
@@ -197,7 +199,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-class SitesViewSet(viewsets.ModelViewSet):
+class SitesViewSet(LoggingMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     queryset = Sites.objects.all()
     serializer_class = SitesCreateUpdateSerializer
@@ -244,7 +246,7 @@ class SitesViewSet(viewsets.ModelViewSet):
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-class PersonsViewSet(viewsets.ModelViewSet):
+class PersonsViewSet(LoggingMixin, viewsets.ModelViewSet):
     queryset = Persons.objects.all()
     serializer_class = PersonsCreateUpdateSerializer
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
@@ -289,7 +291,7 @@ class PersonsViewSet(viewsets.ModelViewSet):
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-class PersonsPageRankViewSet(viewsets.ReadOnlyModelViewSet):
+class PersonsPageRankViewSet(LoggingMixin, viewsets.ReadOnlyModelViewSet):
     queryset = PersonsPageRank.objects.all()
     serializer_class = PersonsPageRankListSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -312,7 +314,7 @@ class PersonsPageRankViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class PPRDateViewSet(viewsets.ReadOnlyModelViewSet):
+class PPRDateViewSet(LoggingMixin, viewsets.ReadOnlyModelViewSet):
     queryset = PersonsPageRank.objects.all()
     serializer_class = PageRankDateListSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -336,7 +338,7 @@ class PPRDateViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class KeyWordsViewSet(viewsets.ModelViewSet):
+class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyKeyWords]
     queryset = KeyWords.objects.all()
     serializer_class = KeyWordsEditSerializer
@@ -387,7 +389,7 @@ class KeyWordsViewSet(viewsets.ModelViewSet):
         return Response({'success': 1}, status=status.HTTP_204_NO_CONTENT)
 
 
-class PagesViewSet(viewsets.ModelViewSet):
+class PagesViewSet(LoggingMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyPages]
     queryset = Pages.objects.all()
     serializer_class = PagesCreateUpdateSerializer
