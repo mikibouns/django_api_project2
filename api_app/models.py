@@ -100,6 +100,10 @@ class Log(models.Model):
     def __str__(self):
         return "<{}, {}>".format(self.adminID, self.action)
 
+    @classmethod
+    def write_log(cls, request, log):
+        new_log = cls(action=log, adminID=request.user)
+        new_log.save()
 
 class KeyWords(models.Model):
     class Meta:
