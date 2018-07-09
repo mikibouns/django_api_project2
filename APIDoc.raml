@@ -3,15 +3,48 @@
 title: Django_api_project
 version: v1
 baseUri: http://127.0.0.1:8000/{version}
-
+securitySchemes:
+  basic:
+    description: |
+      Это API поддерживает Basic Authentication
+    type: Basic Authentication
+  custom_scheme:
+    description: |
+      Это API поддерживат аутентификацию Token
+    type: x-custom
+    describedBy:
+      headers:
+        SpecialToken:
+          description: |
+            Used to send a custom token.
+          type: string
+      responses:
+        401:
+          body:
+            application/json:
+              example:
+                {
+                    "message": 401,
+                    "success": 0,
+                    "exception": "Invalid token."
+                }
+        403:
+          body:
+            application/json:
+              example:
+                {
+                    "message": 403,
+                    "success": 0,
+                    "exception": "Invalid token."
+                }
+                
 /schema:
+  securedBy: basic
   get:
-    description:
+    description: |
       Схема API
     responses:
       200:
-        description:
-          Получаем схему API
         body:
           application/json:
             example:
@@ -64,8 +97,9 @@ baseUri: http://127.0.0.1:8000/{version}
                   "exception": "Invalid token."
               }
 /users:
+  securedBy: basic
   get:
-    description:
+    description: |
       Получаем список пользователей
     queryParameters:
       user_login:
@@ -143,7 +177,7 @@ baseUri: http://127.0.0.1:8000/{version}
                   "exception": "You do not have permission to perform this action."
               }
   post:
-    description:
+    description: |
       Создание пользователя
     responses:
       201:
@@ -175,8 +209,55 @@ baseUri: http://127.0.0.1:8000/{version}
                   "exception": "Unsupported media type \"text/plain\" in request."
               }
   /{id}:
+    securedBy: basic
     get:
+      description: |
+        Получаем пользователя по id
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                {
+                    "user_id": 1,
+                    "user_login": "user1",
+                    "user_email": "user1@mail.com",
+                    "user_isadmin": 0,
+                    "user_addedby": 4
+                }
+        403:
+          description:
+            Если нет прав для доступа к данным
+          body:
+            application/json:
+              example:
+                {
+                    "message": 403,
+                    "success": 0,
+                    "exception": "You do not have permission to perform this action."
+                }
+        404:
+          body: 
+            application/json:
+              example:
+                {
+                    "message": 404,
+                    "success": 0,
+                    "exception": "Not found."
+                }
     patch:
+      description: |
+        Изменяем данные о пользователе
+      responses: 
+        200:
+          body: 
+            application/json:
+              example:
+                {
+                    "success": 1
+                }
+        
+        
     delete:
 /sites:
   get:
