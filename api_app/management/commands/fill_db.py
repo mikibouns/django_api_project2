@@ -56,3 +56,8 @@ class Command(BaseCommand):
 
         super_user = User.objects.create_superuser('admin', 'admin@mail.com', 'admins_password')
         super_user.save()
+
+        users = User.objects.all()
+        for user in users:
+            user.addedBy = super_user
+            user.save()

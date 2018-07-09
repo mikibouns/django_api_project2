@@ -187,7 +187,9 @@ class UsersViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 0,
+                         'expection': serializer._errors,
+                         'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         queryset = self.queryset.get(pk=kwargs.get('pk'))

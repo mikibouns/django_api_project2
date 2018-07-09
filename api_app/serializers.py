@@ -51,6 +51,15 @@ class UsersCreateUpdateSerializer(ModelSerializer):
         user.save()
         return user
 
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.email = validated_data.get('email', instance.email)
+        instance.is_staff = validated_data.get('is_staff', instance.is_staff)
+        if validated_data.get('password', False):
+            instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
+
 # Sites ----------------------------------------------------------------------------------------------------------------
 
 
