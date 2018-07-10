@@ -68,6 +68,7 @@ class Pages(models.Model):
                              "name": new_url.name})
         return urls_id
 
+
 class PersonsPageRank(models.Model):
     class Meta:
         db_table = 'personspagerank'
@@ -93,17 +94,29 @@ class Log(models.Model):
     class Meta:
         db_table = 'log'
 
-    adminID = models.ForeignKey(User, on_delete=models.CASCADE)
+    addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     action = models.CharField(max_length=150)
+    view = models.CharField(max_length=150)
+    method = models.CharField(max_length=150)
+    status_code = models.IntegerField()
+    request_path = models.CharField(max_length=255)
     logDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "<{}, {}>".format(self.adminID, self.action)
+        return "<{}, {}, {}>".format(self.addedBy, self.view, self.status_code)
 
     @classmethod
     def write_log(cls, request, log):
-        new_log = cls(action=log, adminID=request.user)
-        new_log.save()
+        if not request.user.is_anonymous:
+            new_log = cls(addedBy=request.user,
+                          action=log.get('action', None),
+                          view=log.get('view', None),
+                          method=log.get('method', None),
+                          status_code=log.get('status_code', None),
+                          request_path=log.get('request_path', None),
+                          )
+            new_log.save()
+
 
 class KeyWords(models.Model):
     class Meta:
