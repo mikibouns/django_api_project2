@@ -8,7 +8,8 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class LogAdmin(admin.ModelAdmin):
-    list_filter = ('method', 'addedBy', 'status_code', 'action', 'logDate')
+    list_filter = ('method', 'addedBy', 'status_code', 'view', 'action', 'logDate')
+    list_display = ['method', 'addedBy', 'status_code', 'view', 'action', 'request_path', 'logDate']
 
     def get_readonly_fields(self, request, obj=None):
         # make all fields readonly

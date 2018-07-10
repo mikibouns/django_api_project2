@@ -1,4 +1,5 @@
 # from django.contrib.auth.models import User
+
 from auth_app.models import User
 from api_app.models import Sites, Log, Pages, Persons, PersonsPageRank, KeyWords
 from rest_framework.serializers import (
@@ -9,6 +10,7 @@ from rest_framework.serializers import (
 
 
 # Users ----------------------------------------------------------------------------------------------------------------
+
 
 class UsersListSerializer(ModelSerializer):
     user_login = SerializerMethodField() # сознаем новое поле с именем login
@@ -74,6 +76,11 @@ class SitesCreateUpdateSerializer(ModelSerializer):
         model = Sites
         fields = ('name', 'siteDescription')
 
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.siteDescription = validated_data.get('siteDescription', instance.siteDescription)
+        instance.save()
+        return instance
 
 class SitesDetailSerializer(ModelSerializer):
     pages = SerializerMethodField()
@@ -240,6 +247,12 @@ class PagesCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = Pages
         fields = ('URL', 'siteID')
+
+    def update(self, instance, validated_data):
+        instance.URL = validated_data.get('URL', instance.URL)
+        instance.siteID = validated_data.get('siteID', instance.siteID)
+        instance.save()
+        return instance
 
 # KeyWords -------------------------------------------------------------------------------------------------------------
 

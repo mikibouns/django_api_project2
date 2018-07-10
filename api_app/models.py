@@ -9,7 +9,7 @@ class Sites(models.Model):
 
     name = models.CharField(max_length=150)
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
-    siteDescription = models.CharField(max_length=150)
+    siteDescription = models.CharField(max_length=150, blank=True, null=True)
 
     def __str__(self):
         return self.name
