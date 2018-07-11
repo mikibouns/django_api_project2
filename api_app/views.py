@@ -49,6 +49,7 @@ from .filters import (
 )
 
 from .logging import LoggingMixin
+from .utils import validate_json
 
 
 class APIRootView(APIView):
@@ -148,6 +149,7 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
 
     def modified_data(self, data):
         mod_data = {}
+        error_fields = []
         for key, value in {'username': 'user_login',
                            'email': 'user_email',
                            'password': 'user_password',
@@ -156,9 +158,11 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
                 if value == j or key == j:
                     mod_data[key] = data.get(j, None)
                 else:
-                    return {'success': 0,
-                            'expection': '<{}> field is not correct'.format(j),
-                            'message': 400}
+                    error_fields.append(j)
+            if error_fields or not data:
+                return {'success': 0,
+                        'expection': {'the specified fields are not valid for this request': error_fields},
+                        'message': 400}
         return mod_data
 
     def list(self, request, *args, **kwargs):
@@ -177,6 +181,7 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
         if 'expection' in mod_data:
             return Response(mod_data, status=status.HTTP_400_BAD_REQUEST)
         serializer = UsersCreateUpdateSerializer(data=mod_data)
+        self.validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             serializer.save()
             user = User.objects.get(username=serializer.data['username'])
@@ -215,13 +220,6 @@ class SitesViewSet(LoggingMixin, viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('name', 'addedBy')
 
-    def validate_json(self, serializer_fields, request_data):
-        if not request_data:
-            raise ValidationError({'detail': 'data is none'})
-        data = list(filter(lambda x: x not in serializer_fields, request_data))
-        if data:
-            raise ValidationError({'detail': {'the specified fields are not valid for this request': data}})
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = SitesListSerializer(queryset, many=True)
@@ -235,7 +233,7 @@ class SitesViewSet(LoggingMixin, viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = SitesCreateUpdateSerializer(data=request.data, context={'user': request.user})
-        self.validate_json(serializer.fields, request.data)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             site = serializer.save()
             return Response(
@@ -249,7 +247,7 @@ class SitesViewSet(LoggingMixin, viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
         serializer = SitesCreateUpdateSerializer(instance, data=request.data, partial=True) # если partial = True данные разрешено передавать по отдельности
-        self.validate_json(serializer.fields, request.data)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
@@ -271,13 +269,6 @@ class PersonsViewSet(LoggingMixin, viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_class = PersonsFilter
 
-    def validate_json(self, serializer_fields, request_data):
-        if not request_data:
-            raise ValidationError({'detail': 'data is none'})
-        data = list(filter(lambda x: x not in serializer_fields, request_data))
-        if data:
-            raise ValidationError({'detail': {'the specified fields are not valid for this request': data}})
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = PersonsListSerializer(queryset, many=True)
@@ -291,7 +282,7 @@ class PersonsViewSet(LoggingMixin, viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = PersonsCreateUpdateSerializer(data=request.data)
-        self.validate_json(serializer.fields, request.data)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             person = Persons.create(request, person=serializer.validated_data['name'])
             person.save()
@@ -307,7 +298,7 @@ class PersonsViewSet(LoggingMixin, viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
         serializer = PersonsCreateUpdateSerializer(instance, data=request.data, partial=True)
-        self.validate_json(serializer.fields, request.data)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
@@ -374,13 +365,6 @@ class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
     serializer_class = KeyWordsEditSerializer
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
-    def validate_json(self, serializer_fields, request_data):
-        if not request_data:
-            raise ValidationError({'detail': 'data is none'})
-        data = list(filter(lambda x: x not in serializer_fields, request_data))
-        if data:
-            raise ValidationError({'detail': {'the specified fields are not valid for this request': data}})
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(Persons.objects.all())
         serializer = PersonsDetailSerializer(queryset, many=True)
@@ -394,13 +378,13 @@ class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = KeyWordsEditSerializer(data=request.data)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             words_list = serializer.save()
             return Response(
                     {'success': 1,
                      'personID': request.data.get('personID'),
-                     'added_keywords': words_list}
-                    , status=status.HTTP_201_CREATED)
+                     'added_keywords': words_list}, status=status.HTTP_201_CREATED)
         return Response({'success': 0,
                          'expection': serializer._errors,
                          'message': 400}, status=status.HTTP_400_BAD_REQUEST)
@@ -408,7 +392,7 @@ class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         queryset = self.queryset.get(pk=kwargs.get('pk'))
         serializer = KeyWordsListSerializer(queryset, data=request.data, partial=True)
-        self.validate_json(serializer.fields, request.data)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
@@ -428,13 +412,6 @@ class PagesViewSet(LoggingMixin, viewsets.ModelViewSet):
     serializer_class = PagesCreateUpdateSerializer
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
-    def validate_json(self, serializer_fields, request_data):
-        if not request_data:
-            raise ValidationError({'detail': 'data is none'})
-        data = list(filter(lambda x: x not in serializer_fields, request_data))
-        if data:
-            raise ValidationError({'detail': {'the specified fields are not valid for this request': data}})
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(Sites.objects.all())
         serializer = SitesDetailSerializer(queryset, many=True)
@@ -448,7 +425,7 @@ class PagesViewSet(LoggingMixin, viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        self.validate_json(serializer.fields, request.data)
+        validate_json(serializer.fields, request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -461,7 +438,7 @@ class PagesViewSet(LoggingMixin, viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        self.validate_json(serializer.fields, request.data)
+        validate_json(serializer.fields, request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response({'success': 1}, status=status.HTTP_200_OK)
