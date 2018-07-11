@@ -216,6 +216,8 @@ class SitesViewSet(LoggingMixin, viewsets.ModelViewSet):
     filter_fields = ('name', 'addedBy')
 
     def validate_json(self, serializer_fields, request_data):
+        if not request_data:
+            raise ValidationError({'detail': 'data is none'})
         data = list(filter(lambda x: x not in serializer_fields, request_data))
         if data:
             raise ValidationError({'detail': {'the specified fields are not valid for this request': data}})
@@ -375,6 +377,8 @@ class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
     def validate_json(self, serializer_fields, request_data):
+        if not request_data:
+            raise ValidationError({'detail': 'data is none'})
         data = list(filter(lambda x: x not in serializer_fields, request_data))
         if data:
             raise ValidationError({'detail': {'the specified fields are not valid for this request': data}})

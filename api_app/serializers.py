@@ -1,7 +1,7 @@
 # from django.contrib.auth.models import User
 
 from auth_app.models import User
-from api_app.models import Sites, Log, Pages, Persons, PersonsPageRank, KeyWords
+from api_app.models import Sites, Pages, Persons, PersonsPageRank, KeyWords
 from rest_framework.serializers import (
     ModelSerializer,
     SerializerMethodField,
@@ -277,7 +277,7 @@ class KeyWordsEditSerializer(ModelSerializer):
     def create(self, validated_data):
         words_id = []
         for word in validated_data['keywords']:
-            new_word = KeyWords(name=word, personID=Persons.objects.get(id=validated_data['personID']))
+            new_word = KeyWords(name=word, personID=Persons.objects.get(name=validated_data['personID']))
             new_word.save()
             words_id.append({"id": new_word.id,
                              "name": new_word.name})
