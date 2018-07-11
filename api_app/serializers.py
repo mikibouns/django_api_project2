@@ -92,6 +92,7 @@ class SitesCreateUpdateSerializer(ModelSerializer):
         instance.save()
         return instance
 
+
 class SitesDetailSerializer(ModelSerializer):
     pages = SerializerMethodField()
     site_id = SerializerMethodField()
@@ -152,10 +153,6 @@ class PersonsCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = Persons
         fields = ('name', )
-
-    def update(self, instance, validated_data):
-
-        return validated_data
 
 
 # PersonsPageRank ------------------------------------------------------------------------------------------------------
@@ -261,6 +258,7 @@ class PagesCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = Pages
         fields = ('URL', 'siteID')
+
 
     def update(self, instance, validated_data):
         instance.URL = validated_data.get('URL', instance.URL)
