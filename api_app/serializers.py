@@ -48,7 +48,7 @@ class UsersCreateUpdateSerializer(ModelSerializer):
 
     def create(self, validated_data):
         username = validated_data['username']
-        email = validated_data.get('email', '')
+        email = validated_data.get('email', None)
         is_staff = validated_data.get('is_staff', False)
         user = User.objects.create_user(username=username, email=email, is_staff=is_staff)
         user.set_password(validated_data['password'])
