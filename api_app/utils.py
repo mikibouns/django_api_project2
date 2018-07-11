@@ -13,7 +13,7 @@ def custom_exception_handler(exc, context):
     return response
 
 
-def validate_json(self, serializer_fields, request_data):
+def validate_json(serializer_fields, request_data):
     if not request_data:
         raise ValidationError({'detail': 'data is none'})
     data = list(filter(lambda x: x not in serializer_fields, request_data))

@@ -1,5 +1,4 @@
 # from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
-from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 # from django.contrib.auth.models import User
 from auth_app.models import User

@@ -1,5 +1,4 @@
 # from django.contrib.auth.models import User
-from rest_framework.exceptions import ValidationError
 from auth_app.models import User
 from api_app.models import Sites, Pages, Persons, PersonsPageRank, KeyWords
 from rest_framework.serializers import (
