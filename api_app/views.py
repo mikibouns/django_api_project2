@@ -391,24 +391,17 @@ class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        try:
-            person = Persons.objects.get(id=request.data['personID'])
-            if person.addedBy == request.user or request.user.is_superuser:
-                words_list = KeyWords.create(request,
-                                             words=request.data['keywords'],
-                                             person=person)
-                return Response(
+        serializer = KeyWordsEditSerializer(data=request.data)
+        if serializer.is_valid():
+            words_list = serializer.save()
+            return Response(
                     {'success': 1,
-                     'personID': person.id,
+                     'personID': request.data.get('personID'),
                      'added_keywords': words_list}
-                    , status=status.HTTP_201_CREATED
-                )
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        except Exception as e:
-            print(e)
-            return Response({'success': 0,
-                             'expection': serializer._errors,
-                             'message': 400}, status=status.HTTP_400_BAD_REQUEST)
+                    , status=status.HTTP_201_CREATED)
+        return Response({'success': 0,
+                         'expection': serializer._errors,
+                         'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         queryset = self.queryset.get(pk=kwargs.get('pk'))

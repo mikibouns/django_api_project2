@@ -269,12 +269,17 @@ class KeyWordsEditSerializer(ModelSerializer):
         model = KeyWords
         fields = ('personID', 'keywords')
 
+    def validate_keywords(self, value):
+        if isinstance(value, str):
+            value = value.replace(' ', '').split(',')
+        return value
 
-# Log ------------------------------------------------------------------------------------------------------------------
-
-class LogSerializer(ModelSerializer):
-    class Meta:
-        model = Log
-        fields = ('adminID', 'action', 'logDate')
-
+    def create(self, validated_data):
+        words_id = []
+        for word in validated_data['keywords']:
+            new_word = KeyWords(name=word, personID=Persons.objects.get(id=validated_data['personID']))
+            new_word.save()
+            words_id.append({"id": new_word.id,
+                             "name": new_word.name})
+        return words_id
 

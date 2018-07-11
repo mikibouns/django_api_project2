@@ -56,18 +56,6 @@ class Pages(models.Model):
     def __str__(self):
         return self.URL
 
-    @classmethod
-    def create(cls, request, urls, person):
-        if isinstance(urls, str):
-            urls = urls.replace(' ', '').split(',')
-        urls_id = []
-        for url in urls:
-            new_url = cls(name=url, personID=person)
-            new_url.save()
-            urls_id.append({"id": new_url.id,
-                             "name": new_url.name})
-        return urls_id
-
 
 class PersonsPageRank(models.Model):
     class Meta:
@@ -127,15 +115,3 @@ class KeyWords(models.Model):
 
     def __str__(self):
         return self.name
-
-    @classmethod
-    def create(cls, request, words, person):
-        if isinstance(words, str):
-            words = words.replace(' ', '').split(',')
-        words_id = []
-        for word in words:
-            new_word = cls(name=word, personID=person)
-            new_word.save()
-            words_id.append({"id": new_word.id,
-                             "name": new_word.name})
-        return words_id
