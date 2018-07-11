@@ -22,12 +22,14 @@ def validate_json(serializer_fields, request_data):
 
 
 def modified_user_data(data):
+    fields_dict = {'username': 'user_login',
+                   'password': 'user_password',
+                   'email': 'user_email',
+                   'is_staff': 'user_isadmin'}
     if data:
-        data['username'] = data.pop('user_login', None)
-        data['password'] = data.pop('user_password', None)
-        data['email'] = data.pop('user_email', None)
-        data['is_staff'] = data.pop('user_isadmin', None)
-        for key, value in data.items():
-            if value is None:
-                data.pop(key)
+        for key, value in fields_dict.items():
+            data[key] = data.pop(value, None)
+
+        data = dict(filter(lambda x: data[x] is not None, data))
+        print(data)
     return data
