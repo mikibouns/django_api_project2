@@ -28,9 +28,9 @@ def modified_user_data(data):
                    'is_staff': 'user_isadmin'}
     if data:
         for key, value in fields_dict.items():
-            data[key] = data.pop(value, None)
-            if data[key] is None:
-                data.pop(key)
+            content = data.pop(value, None)
+            if content is not None:
+                data[key] = content
 
-        print(data)
+
     return data
