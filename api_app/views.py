@@ -234,18 +234,14 @@ class SitesViewSet(LoggingMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        serializer = SitesCreateUpdateSerializer(data=request.data)
+        serializer = SitesCreateUpdateSerializer(data=request.data, context={'user': request.user})
         self.validate_json(serializer.fields, request.data)
         if serializer.is_valid():
-            site = Sites.create(request,
-                                  name=serializer.validated_data['name'],
-                                  siteDesc=serializer.validated_data['siteDescription'])
-            site.save()
+            site = serializer.save()
             return Response(
                 {'success': 1,
                 'persons_id': site.id}
-                , status=status.HTTP_201_CREATED
-            )
+                , status=status.HTTP_201_CREATED)
         return Response({'success': 0,
                          'expection': serializer._errors,
                          'message': 400}, status=status.HTTP_400_BAD_REQUEST)

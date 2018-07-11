@@ -76,6 +76,16 @@ class SitesCreateUpdateSerializer(ModelSerializer):
         model = Sites
         fields = ('name', 'siteDescription')
 
+    def create(self, validated_data):
+        name = validated_data.get('name')
+        siteDescription = validated_data.get('siteDescription', '')
+        addedBy = self.context['user']
+        new_site = Sites(name=name,
+                         siteDescription=siteDescription,
+                         addedBy=addedBy)
+        new_site.save()
+        return new_site
+
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.siteDescription = validated_data.get('siteDescription', instance.siteDescription)
@@ -142,6 +152,10 @@ class PersonsCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = Persons
         fields = ('name', )
+
+    def update(self, instance, validated_data):
+
+        return validated_data
 
 
 # PersonsPageRank ------------------------------------------------------------------------------------------------------
@@ -268,14 +282,6 @@ class KeyWordsEditSerializer(ModelSerializer):
     class Meta:
         model = KeyWords
         fields = ('personID', 'keywords')
-
-    def validate(self, attrs):
-        if not self.data:
-            raise ValidationError({'detail': 'data is none'})
-        data = list(filter(lambda x: x not in self.fields, self.data))
-        if data:
-            raise ValidationError({'detail': {'the specified fields are not valid for this request': data}})
-        return attrs
 
     def validate_keywords(self, value):
         if isinstance(value, str):

@@ -14,11 +14,6 @@ class Sites(models.Model):
     def __str__(self):
         return self.name
 
-    @classmethod
-    def create(cls, request, name, siteDesc):
-        new_person = cls(name=name, siteDescription=siteDesc, addedBy=request.user)
-        return new_person
-
     def pages_children(self):
         '''метод для отображения содержимого поля ForeignKey'''
         return Pages.objects.filter(siteID=self)
