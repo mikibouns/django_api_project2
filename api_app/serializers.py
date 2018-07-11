@@ -1,5 +1,5 @@
 # from django.contrib.auth.models import User
-
+from rest_framework.exceptions import ValidationError
 from auth_app.models import User
 from api_app.models import Sites, Pages, Persons, PersonsPageRank, KeyWords
 from rest_framework.serializers import (
@@ -268,6 +268,14 @@ class KeyWordsEditSerializer(ModelSerializer):
     class Meta:
         model = KeyWords
         fields = ('personID', 'keywords')
+
+    def validate(self, attrs):
+        if not self.data:
+            raise ValidationError({'detail': 'data is none'})
+        data = list(filter(lambda x: x not in self.fields, self.data))
+        if data:
+            raise ValidationError({'detail': {'the specified fields are not valid for this request': data}})
+        return attrs
 
     def validate_keywords(self, value):
         if isinstance(value, str):
