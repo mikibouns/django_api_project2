@@ -48,7 +48,7 @@ from .filters import (
 )
 
 from .logging import LoggingMixin
-from .utils import validate_json
+from .utils import validate_json, modified_user_data
 
 
 class APIRootView(APIView):
@@ -146,24 +146,6 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_class = UsersFilter
 
-    def modified_data(self, data):
-        mod_data = {}
-        error_fields = []
-        for key, value in {'username': 'user_login',
-                           'email': 'user_email',
-                           'password': 'user_password',
-                           'is_staff': 'user_isadmin'}.items():
-            for j in data.keys():
-                if value == j or key == j:
-                    mod_data[key] = data.get(j, None)
-                else:
-                    error_fields.append(j)
-            if error_fields or not data:
-                return {'success': 0,
-                        'expection': {'the specified fields are not valid for this request': error_fields},
-                        'message': 400}
-        return mod_data
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = UsersListSerializer(queryset, many=True)
@@ -176,11 +158,9 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        mod_data = self.modified_data(request.data)
-        if 'expection' in mod_data:
-            return Response(mod_data, status=status.HTTP_400_BAD_REQUEST)
+        mod_data = modified_user_data(request.data)
         serializer = UsersCreateUpdateSerializer(data=mod_data)
-        self.validate_json(serializer.fields, request.data)
+        validate_json(serializer.fields, mod_data)
         if serializer.is_valid():
             serializer.save()
             user = User.objects.get(username=serializer.data['username'])
@@ -193,11 +173,10 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
                              'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        mod_data = self.modified_data(request.data)
-        if 'expection' in mod_data:
-            return Response(mod_data, status=status.HTTP_400_BAD_REQUEST)
+        mod_data = modified_user_data(request.data)
         queryset = self.queryset.get(pk=kwargs.get('pk'))
         serializer = UsersCreateUpdateSerializer(queryset, data=request.data, partial=True)
+        validate_json(serializer.fields, mod_data)
         if serializer.is_valid():
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)

@@ -53,7 +53,6 @@ class UsersCreateUpdateSerializer(ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-
         instance.username = validated_data.get('username', instance.username)
         instance.email = validated_data.get('email', instance.email)
         instance.is_staff = validated_data.get('is_staff', instance.is_staff)
