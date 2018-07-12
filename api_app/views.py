@@ -25,7 +25,6 @@ from .serializers import (
     PersonsCreateUpdateSerializer,
     SitesListSerializer,
     SitesCreateUpdateSerializer,
-    SitesDetailSerializer,
     PersonsPageRankListSerializer,
     PersonsPageRankGroupSerializer,
     PageRankDateListSerializer,
@@ -33,6 +32,7 @@ from .serializers import (
     KeyWordsListSerializer,
     PagesCreateUpdateSerializer,
     PagesListSerializer,
+    PagesDetailSerializer
 )
 
 from .permissions import (
@@ -45,6 +45,7 @@ from .filters import (
     PersonsFilter,
     PersonsPageRankFilter,
     UsersFilter,
+    PagesFilter
 )
 
 from .logging import LoggingMixin
@@ -388,17 +389,22 @@ class PagesViewSet(LoggingMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyPages]
     queryset = Pages.objects.all()
     serializer_class = PagesCreateUpdateSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PagesFilter
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(Sites.objects.all())
-        serializer = SitesDetailSerializer(queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        print(request)
+        serializer = PagesListSerializer(queryset, many=True)
+        for i in serializer.data:
+            print(i)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         urls = get_object_or_404(queryset, pk=kwargs.get('pk'))
-        serializer = PagesListSerializer(urls)
+        serializer = PagesDetailSerializer(urls)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):

@@ -94,28 +94,6 @@ class SitesCreateUpdateSerializer(ModelSerializer):
         instance.save()
         return instance
 
-
-class SitesDetailSerializer(ModelSerializer):
-    pages = SerializerMethodField()
-    site_id = SerializerMethodField()
-    site_name = SerializerMethodField()
-
-    class Meta:
-        model = Sites
-        fields = ('site_id', 'site_name', 'pages')
-
-    def get_pages(self, obj):
-        data = PagesDetailSerializer(obj.pages_children(), many=True).data
-        if data:
-            return data
-        return None
-
-    def get_site_id(self, obj):
-        return int(obj.id)
-
-    def get_site_name(self, obj):
-        return str(obj.name)
-
 # Persons --------------------------------------------------------------------------------------------------------------
 
 
@@ -245,9 +223,25 @@ class PagesGiveSerializer(ModelSerializer):
 
 
 class PagesListSerializer(ModelSerializer):
+    pages = SerializerMethodField()
+    site_id = SerializerMethodField()
+    site_name = SerializerMethodField()
+
     class Meta:
         model = Pages
-        fields = ('id', 'URL', 'siteID')
+        fields = ('site_id', 'site_name', 'pages')
+
+    def get_pages(self, obj):
+        data = PagesDetailSerializer(obj.siteID.pages_children(), many=True).data
+        if data:
+            return data
+        return None
+
+    def get_site_id(self, obj):
+            return int(obj.siteID.id)
+
+    def get_site_name(self, obj):
+            return str(obj.siteID.name)
 
 
 class PagesDetailSerializer(ModelSerializer):
