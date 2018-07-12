@@ -216,7 +216,7 @@ class SitesViewSet(LoggingMixin, viewsets.ModelViewSet):
             site = serializer.save()
             return Response(
                 {'success': 1,
-                'persons_id': site.id}
+                'site_id': site.id}
                 , status=status.HTTP_201_CREATED)
         return Response({'success': 0,
                          'expection': serializer._errors,
