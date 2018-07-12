@@ -31,6 +31,4 @@ def modified_user_data(data):
             content = data.pop(value, None)
             if content is not None:
                 data[key] = content
-
-
     return data

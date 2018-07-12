@@ -20,6 +20,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 class User(AbstractUser):
     class Meta:
         db_table = 'users'
+        unique_together = ('email',)
 
     addedBy = models.ForeignKey("self", blank=True, null=True, on_delete=models.CASCADE)
 
