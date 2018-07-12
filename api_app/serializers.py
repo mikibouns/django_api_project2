@@ -291,7 +291,7 @@ class KeyWordsEditSerializer(ModelSerializer):
     def create(self, validated_data):
         words_id = []
         for word in validated_data['keywords']:
-            new_word = KeyWords(name=word, personID=Persons.objects.get(name=validated_data['personID']))
+            new_word = KeyWords(name=word, personID=validated_data['personID'])
             new_word.save()
             words_id.append({"id": new_word.id,
                              "name": new_word.name})
