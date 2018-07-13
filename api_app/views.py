@@ -267,7 +267,7 @@ class PersonsViewSet(LoggingMixin, viewsets.ModelViewSet):
             person.save()
             return Response(
                 {'success': 1,
-                'persons_id': person.id}
+                'person_id': person.id}
                 , status=status.HTTP_201_CREATED
             )
         return Response({'success': 0,
@@ -342,11 +342,13 @@ class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyKeyWords]
     queryset = KeyWords.objects.all()
     serializer_class = KeyWordsEditSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('name', 'personID')
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(Persons.objects.all())
-        serializer = PersonsDetailSerializer(queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = KeyWordsListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):

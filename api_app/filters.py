@@ -25,7 +25,7 @@ class UsersFilter(filters.FilterSet):
 class PersonsFilter(filters.FilterSet):
     class Meta:
         model = Persons
-        fields = ['id', 'name', 'addedBy']
+        fields = ['name', 'addedBy']
 
 
 class PersonsPageRankFilter(filters.FilterSet):

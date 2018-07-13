@@ -247,7 +247,7 @@ class PagesListSerializer(ModelSerializer):
 class PagesDetailSerializer(ModelSerializer):
     class Meta:
         model = Pages
-        fields = ('id', 'URL')
+        fields = ('id', 'siteID', 'URL')
 
 
 class PagesCreateUpdateSerializer(ModelSerializer):
@@ -268,7 +268,7 @@ class PagesCreateUpdateSerializer(ModelSerializer):
 class KeyWordsListSerializer(ModelSerializer):
     class Meta:
         model = KeyWords
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'personID')
 
 
 class KeyWordsEditSerializer(ModelSerializer):
