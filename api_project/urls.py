@@ -21,6 +21,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^v1/', include('api_app.urls', namespace='v1')),
     # url(r'^auth/', include('auth_app.urls')),
-    url(r'^api_doc/$', api_view.api_doc, name='api_doc'),
+    url(r'^api-doc/$', api_view.api_doc, name='api_doc'),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
