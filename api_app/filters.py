@@ -39,6 +39,7 @@ class PersonsPageRankFilter(filters.FilterSet):
         model = PersonsPageRank
         fields = ['siteID', 'personID', 'pageID', 'rank', '_from', '_till']
 
+
 class PagesFilter(filters.FilterSet):
     class Meta:
         model = Pages
