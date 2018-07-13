@@ -21,11 +21,4 @@ class LoggingMixin(object):
             'request_path': request.path,
         }
         Log.write_log(request=request, log=log_kwargs)
-
-        # if status.is_server_error(status_code):
-        #     pass
-        # elif status.is_client_error(status_code):
-        #     pass
-        # else:
-        #     pass
         return response
