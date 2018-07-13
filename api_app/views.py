@@ -61,6 +61,11 @@ class APIRootView(APIView):
     def get(self, request):
         data = [
             {
+                'api_url': reverse('api_doc', request=request),
+                'method': 'get',
+                'comments': 'Документация к API'
+            },
+            {
                 'api_url': request.build_absolute_uri(),
                 'method': 'get',
                 'comments': 'Доступные url (этот документ)'
@@ -401,10 +406,7 @@ class PagesViewSet(LoggingMixin, viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        print(request)
-        serializer = PagesListSerializer(queryset, many=True)
-        for i in serializer.data:
-            print(i)
+        serializer = PagesDetailSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
