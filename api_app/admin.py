@@ -7,8 +7,23 @@ class UserAdmin(admin.ModelAdmin):
     readonly_fields = ['addedBy', ]
 
 
+class LogAdmin(admin.ModelAdmin):
+    list_filter = ('method', 'addedBy', 'status_code', 'view', 'action', 'logDate')
+    list_display = ['method', 'addedBy', 'status_code', 'view', 'action', 'request_path', 'logDate']
+
+    def get_readonly_fields(self, request, obj=None):
+        # make all fields readonly
+        readonly_fields = list(set(
+            [field.name for field in self.opts.local_fields]
+        ))
+        return readonly_fields
+
+    def has_add_permission(self, request):
+        return False
+
+
 admin.site.register(Sites)
-admin.site.register(Log)
+admin.site.register(Log, LogAdmin)
 admin.site.register(Pages)
 admin.site.register(Persons)
 admin.site.register(PersonsPageRank)

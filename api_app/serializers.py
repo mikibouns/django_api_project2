@@ -1,6 +1,6 @@
 # from django.contrib.auth.models import User
 from auth_app.models import User
-from api_app.models import Sites, Log, Pages, Persons, PersonsPageRank, KeyWords
+from api_app.models import Sites, Pages, Persons, PersonsPageRank, KeyWords
 from rest_framework.serializers import (
     ModelSerializer,
     SerializerMethodField,
@@ -9,6 +9,7 @@ from rest_framework.serializers import (
 
 
 # Users ----------------------------------------------------------------------------------------------------------------
+
 
 class UsersListSerializer(ModelSerializer):
     user_login = SerializerMethodField() # сознаем новое поле с именем login
@@ -46,7 +47,10 @@ class UsersCreateUpdateSerializer(ModelSerializer):
         fields = ('username', 'email', 'password', 'is_staff')
 
     def create(self, validated_data):
-        user = super(UsersCreateUpdateSerializer, self).create(validated_data)
+        username = validated_data['username']
+        email = validated_data.get('email', None)
+        is_staff = validated_data.get('is_staff', False)
+        user = User.objects.create_user(username=username, email=email, is_staff=is_staff)
         user.set_password(validated_data['password'])
         user.save()
         return user
@@ -74,27 +78,21 @@ class SitesCreateUpdateSerializer(ModelSerializer):
         model = Sites
         fields = ('name', 'siteDescription')
 
+    def create(self, validated_data):
+        name = validated_data.get('name')
+        siteDescription = validated_data.get('siteDescription', '')
+        addedBy = self.context['user']
+        new_site = Sites(name=name,
+                         siteDescription=siteDescription,
+                         addedBy=addedBy)
+        new_site.save()
+        return new_site
 
-class SitesDetailSerializer(ModelSerializer):
-    pages = SerializerMethodField()
-    site_id = SerializerMethodField()
-    site_name = SerializerMethodField()
-
-    class Meta:
-        model = Sites
-        fields = ('site_id', 'site_name', 'pages')
-
-    def get_pages(self, obj):
-        data = PagesDetailSerializer(obj.pages_children(), many=True).data
-        if data:
-            return data
-        return None
-
-    def get_site_id(self, obj):
-        return int(obj.id)
-
-    def get_site_name(self, obj):
-        return str(obj.name)
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.siteDescription = validated_data.get('siteDescription', instance.siteDescription)
+        instance.save()
+        return instance
 
 # Persons --------------------------------------------------------------------------------------------------------------
 
@@ -225,15 +223,31 @@ class PagesGiveSerializer(ModelSerializer):
 
 
 class PagesListSerializer(ModelSerializer):
+    pages = SerializerMethodField()
+    site_id = SerializerMethodField()
+    site_name = SerializerMethodField()
+
     class Meta:
         model = Pages
-        fields = ('id', 'URL', 'siteID')
+        fields = ('site_id', 'site_name', 'pages')
+
+    def get_pages(self, obj):
+        data = PagesDetailSerializer(obj.siteID.pages_children(), many=True).data
+        if data:
+            return data
+        return None
+
+    def get_site_id(self, obj):
+            return int(obj.siteID.id)
+
+    def get_site_name(self, obj):
+            return str(obj.siteID.name)
 
 
 class PagesDetailSerializer(ModelSerializer):
     class Meta:
         model = Pages
-        fields = ('id', 'URL')
+        fields = ('id', 'siteID', 'URL')
 
 
 class PagesCreateUpdateSerializer(ModelSerializer):
@@ -241,13 +255,20 @@ class PagesCreateUpdateSerializer(ModelSerializer):
         model = Pages
         fields = ('URL', 'siteID')
 
+
+    def update(self, instance, validated_data):
+        instance.URL = validated_data.get('URL', instance.URL)
+        instance.siteID = validated_data.get('siteID', instance.siteID)
+        instance.save()
+        return instance
+
 # KeyWords -------------------------------------------------------------------------------------------------------------
 
 
 class KeyWordsListSerializer(ModelSerializer):
     class Meta:
         model = KeyWords
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'personID')
 
 
 class KeyWordsEditSerializer(ModelSerializer):
@@ -256,12 +277,17 @@ class KeyWordsEditSerializer(ModelSerializer):
         model = KeyWords
         fields = ('personID', 'keywords')
 
+    def validate_keywords(self, value):
+        if isinstance(value, str):
+            value = value.replace(' ', '').split(',')
+        return value
 
-# Log ------------------------------------------------------------------------------------------------------------------
-
-class LogSerializer(ModelSerializer):
-    class Meta:
-        model = Log
-        fields = ('adminID', 'action', 'logDate')
-
+    def create(self, validated_data):
+        words_id = []
+        for word in validated_data['keywords']:
+            new_word = KeyWords(name=word, personID=validated_data['personID'])
+            new_word.save()
+            words_id.append({"id": new_word.id,
+                             "name": new_word.name})
+        return words_id
 

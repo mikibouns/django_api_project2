@@ -1,10 +1,9 @@
 # from .paginations import PostLimitOffsetPagination, PostPageNumberPagination
-
 from django_filters.rest_framework import DjangoFilterBackend
 # from django.contrib.auth.models import User
 from auth_app.models import User
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
@@ -26,7 +25,6 @@ from .serializers import (
     PersonsCreateUpdateSerializer,
     SitesListSerializer,
     SitesCreateUpdateSerializer,
-    SitesDetailSerializer,
     PersonsPageRankListSerializer,
     PersonsPageRankGroupSerializer,
     PageRankDateListSerializer,
@@ -34,6 +32,7 @@ from .serializers import (
     KeyWordsListSerializer,
     PagesCreateUpdateSerializer,
     PagesListSerializer,
+    PagesDetailSerializer
 )
 
 from .permissions import (
@@ -46,15 +45,27 @@ from .filters import (
     PersonsFilter,
     PersonsPageRankFilter,
     UsersFilter,
+    PagesFilter
 )
 
 from .logging import LoggingMixin
+from .utils import validate_json, modified_user_data
+
+
+def api_doc(request):
+    # return render_to_response('api_app/api_doc.html')
+    return render(request, 'api_app/api_doc.html')
 
 
 class APIRootView(APIView):
 
     def get(self, request):
         data = [
+            {
+                'api_url': reverse('api_doc', request=request),
+                'method': 'get',
+                'comments': 'Документация к API'
+            },
             {
                 'api_url': request.build_absolute_uri(),
                 'method': 'get',
@@ -146,17 +157,6 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_class = UsersFilter
 
-    def modified_data(self, data):
-        mod_data = {}
-        for key, value in {'username': 'user_login',
-                           'email': 'user_email',
-                           'password': 'user_password',
-                           'is_staff': 'user_isadmin'}.items():
-            for j in data.keys():
-                if value == j or key == j:
-                    mod_data[key] = data.get(j, None)
-        return mod_data
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = UsersListSerializer(queryset, many=True)
@@ -169,8 +169,9 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        mod_data = self.modified_data(request.data)
+        mod_data = modified_user_data(request.data)
         serializer = UsersCreateUpdateSerializer(data=mod_data)
+        validate_json(serializer.fields, mod_data)
         if serializer.is_valid():
             serializer.save()
             user = User.objects.get(username=serializer.data['username'])
@@ -183,9 +184,10 @@ class UsersViewSet(LoggingMixin, viewsets.ModelViewSet):
                              'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        mod_data = self.modified_data(request.data)
+        mod_data = modified_user_data(request.data)
         queryset = self.queryset.get(pk=kwargs.get('pk'))
-        serializer = UsersCreateUpdateSerializer(queryset, data=mod_data, partial=True)
+        serializer = UsersCreateUpdateSerializer(queryset, data=request.data, partial=True)
+        validate_json(serializer.fields, mod_data)
         if serializer.is_valid():
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
@@ -219,26 +221,28 @@ class SitesViewSet(LoggingMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        serializer = SitesCreateUpdateSerializer(data=request.data)
+        serializer = SitesCreateUpdateSerializer(data=request.data, context={'user': request.user})
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
-            site = Sites.create(request,
-                                  name=serializer.validated_data['name'],
-                                  siteDesc=serializer.validated_data['siteDescription'])
-            site.save()
+            site = serializer.save()
             return Response(
                 {'success': 1,
-                'persons_id': site.id}
-                , status=status.HTTP_201_CREATED
-            )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+                'site_id': site.id}
+                , status=status.HTTP_201_CREATED)
+        return Response({'success': 0,
+                         'expection': serializer._errors,
+                         'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
-        serializer = SitesCreateUpdateSerializer(instance, data=request.data, partial=True)
+        serializer = SitesCreateUpdateSerializer(instance, data=request.data, partial=True) # если partial = True данные разрешено передавать по отдельности
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 0,
+                         'expection': serializer._errors,
+                         'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
@@ -267,23 +271,29 @@ class PersonsViewSet(LoggingMixin, viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = PersonsCreateUpdateSerializer(data=request.data)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             person = Persons.create(request, person=serializer.validated_data['name'])
             person.save()
             return Response(
                 {'success': 1,
-                'persons_id': person.id}
+                'person_id': person.id}
                 , status=status.HTTP_201_CREATED
             )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 0,
+                         'expection': serializer._errors,
+                         'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
         serializer = PersonsCreateUpdateSerializer(instance, data=request.data, partial=True)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 0,
+                         'expection': serializer._errors,
+                         'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.queryset.get(pk=kwargs.get('pk'))
@@ -342,11 +352,13 @@ class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyKeyWords]
     queryset = KeyWords.objects.all()
     serializer_class = KeyWordsEditSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('name', 'personID')
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(Persons.objects.all())
-        serializer = PersonsDetailSerializer(queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = KeyWordsListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
@@ -356,32 +368,28 @@ class KeyWordsViewSet(LoggingMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        try:
-            person = Persons.objects.get(id=request.data['personID'])
-            if person.addedBy == request.user or request.user.is_superuser:
-                words_list = KeyWords.create(request,
-                                       words=request.data['keywords'],
-                                       person=person)
-                return Response(
+        serializer = KeyWordsEditSerializer(data=request.data)
+        validate_json(serializer.fields, request.data)
+        if serializer.is_valid():
+            words_list = serializer.save()
+            return Response(
                     {'success': 1,
-                     'personID': person.id,
-                     'added_keywords': words_list}
-                    , status=status.HTTP_201_CREATED
-                )
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        except Exception as e:
-            print(e)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+                     'personID': request.data.get('personID'),
+                     'added_keywords': words_list}, status=status.HTTP_201_CREATED)
+        return Response({'success': 0,
+                         'expection': serializer._errors,
+                         'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         queryset = self.queryset.get(pk=kwargs.get('pk'))
         serializer = KeyWordsListSerializer(queryset, data=request.data, partial=True)
-        print(serializer)
+        validate_json(serializer.fields, request.data)
         if serializer.is_valid():
-
             serializer.save()
             return Response({'success': 1}, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 0,
+                         'expection': serializer._errors,
+                         'message': 400}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -393,21 +401,24 @@ class PagesViewSet(LoggingMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyPages]
     queryset = Pages.objects.all()
     serializer_class = PagesCreateUpdateSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PagesFilter
     http_method_names = ['get', 'post', 'patch', 'delete', 'head']
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(Sites.objects.all())
-        serializer = SitesDetailSerializer(queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = PagesDetailSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         urls = get_object_or_404(queryset, pk=kwargs.get('pk'))
-        serializer = PagesListSerializer(urls)
+        serializer = PagesDetailSerializer(urls)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        validate_json(serializer.fields, request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -420,6 +431,7 @@ class PagesViewSet(LoggingMixin, viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        validate_json(serializer.fields, request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response({'success': 1}, status=status.HTTP_200_OK)

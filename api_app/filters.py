@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from .models import Persons, PersonsPageRank, KeyWords
+from .models import Persons, PersonsPageRank, KeyWords, Pages
 from auth_app.models import User
 
 
@@ -25,7 +25,7 @@ class UsersFilter(filters.FilterSet):
 class PersonsFilter(filters.FilterSet):
     class Meta:
         model = Persons
-        fields = ['id', 'name', 'addedBy']
+        fields = ['name', 'addedBy']
 
 
 class PersonsPageRankFilter(filters.FilterSet):
@@ -38,3 +38,9 @@ class PersonsPageRankFilter(filters.FilterSet):
     class Meta:
         model = PersonsPageRank
         fields = ['siteID', 'personID', 'pageID', 'rank', '_from', '_till']
+
+
+class PagesFilter(filters.FilterSet):
+    class Meta:
+        model = Pages
+        fields = ['URL', 'siteID']
