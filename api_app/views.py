@@ -53,7 +53,7 @@ from .utils import validate_json, modified_user_data
 
 
 def api_doc(request):
-    return render_to_response('api_app/api_docs.html')
+    return render_to_response('api_app/api_doc.html')
 
 
 class APIRootView(APIView):
