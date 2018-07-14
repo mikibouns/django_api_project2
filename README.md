@@ -50,4 +50,4 @@
 login: admin
 password: admins_password
 ```
-#### Документация API нахоиться в [этом](https://github.com/mikibouns/django_api_project2/blob/dev_2.1/api_app/templates/api_app/api_docs.html) файле идоступна из веб приложения http://127.0.0.1:8000/api-doc/
+#### Документация API нахоиться в [этом](https://github.com/mikibouns/django_api_project2/blob/dev_2.1/api_app/templates/api_app/api_docs.html) файле и доступна из веб приложения http://127.0.0.1:8000/api-doc/
