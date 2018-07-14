@@ -50,3 +50,4 @@
 login: admin
 password: admins_password
 ```
+## [Документация API](https://github.com/mikibouns/django_api_project2/blob/dev_2.1/api_app/templates/api_app/api_docs.html)
