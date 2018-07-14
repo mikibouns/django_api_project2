@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 # from django.contrib.auth.models import User
 from auth_app.models import User
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, render
 from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
@@ -53,7 +53,8 @@ from .utils import validate_json, modified_user_data
 
 
 def api_doc(request):
-    return render_to_response('api_app/api_doc.html')
+    # return render_to_response('api_app/api_doc.html')
+    return render(request, 'api_app/api_doc.html')
 
 
 class APIRootView(APIView):
